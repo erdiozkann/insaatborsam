@@ -1,0 +1,4 @@
+# pnpm workspace tanımı — apps/* ve packages/* tüm workspace'e dahil
+packages:
+  - "apps/*"
+  - "packages/*"

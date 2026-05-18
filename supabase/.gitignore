@@ -1,0 +1,5 @@
+# Supabase local geçici dosyaları
+.branches/
+.temp/
+.env
+.env.local

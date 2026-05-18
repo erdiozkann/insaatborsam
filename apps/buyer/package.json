@@ -1,0 +1,11 @@
+{
+  "name": "@insaatborsam/buyer",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Buyer App — Müteahhit/usta için React Native + Expo. Sprint 1'de expo init çalıştırılacak.",
+  "scripts": {
+    "dev": "echo 'Sprint 1: expo init sonrası eklenecek (npx expo start)'",
+    "typecheck": "echo 'Sprint 1 sonrası: tsc --noEmit'",
+    "clean": "rm -rf .expo node_modules"
+  }
+}
