@@ -1,4 +1,5 @@
-// @insaatborsam/database — Supabase types ve client wrapper. Sprint 1'de doldurulacak.
-// types.ts pnpm db:types ile generate edilir (supabase gen types typescript --linked).
+// @insaatborsam/database — Auto-generated Supabase type'ları.
+// types.ts elle düzenlenmez — `pnpm db:types` ile yeniden üretilir.
+// Supabase zaten Tables, TablesInsert, TablesUpdate, Enums, Database, Json export ediyor.
 
-export const PLACEHOLDER = "database-pkg-bootstrap" as const;
+export * from './types.js'

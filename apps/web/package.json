@@ -13,14 +13,18 @@
     "clean": "rm -rf .next .turbo node_modules"
   },
   "dependencies": {
-    "@insaatborsam/ui": "workspace:*",
+    "@insaatborsam/database": "workspace:*",
     "@insaatborsam/shared": "workspace:*",
+    "@insaatborsam/ui": "workspace:*",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.106.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.460.0",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "lucide-react": "^0.460.0",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^2.5.5"
+    "tailwind-merge": "^2.5.5",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",
