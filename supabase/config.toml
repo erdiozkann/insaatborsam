@@ -1,7 +1,7 @@
 # İnşaat Borsam Supabase local config. project_id Sprint 1'de gerçek Supabase projesi açılınca güncellenecek.
 # Referans: https://supabase.com/docs/guides/local-development/cli/config
 
-project_id = "insaatborsam-placeholder"
+project_id = "insaatborsam"
 
 [api]
 enabled = true
