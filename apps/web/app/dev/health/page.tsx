@@ -37,58 +37,58 @@ export default async function HealthPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f9fb] px-8 py-12 font-[Inter,sans-serif]">
+    <main className="min-h-screen bg-surface px-8 py-12 font-sans">
       <div className="max-w-2xl mx-auto flex flex-col gap-8">
 
         {/* Başlık */}
-        <div className="border-b border-[#d4c4ac] pb-6">
-          <p className="text-xs uppercase tracking-widest font-bold text-[#827560] mb-2">
+        <div className="border-b border-border pb-6">
+          <p className="text-xs uppercase tracking-widest font-bold text-ink-muted mb-2">
             Geliştirici Araçları
           </p>
-          <h1 className="text-2xl font-bold text-[#191c1e]">
+          <h1 className="text-2xl font-bold text-ink">
             Sistem Sağlık Kontrolü
           </h1>
-          <p className="mt-1 text-sm text-[#504533]">
+          <p className="mt-1 text-sm text-ink-secondary">
             Supabase bağlantısı ve temel tablo erişimi
           </p>
         </div>
 
         {/* Bağlantı durumu */}
-        <div className="border border-[#d4c4ac] bg-white p-6 flex flex-col gap-4">
+        <div className="border border-border bg-surface-container-lowest p-6 flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <span
-              className={`block h-3 w-3 ${result.ok ? 'bg-[#10B981]' : 'bg-[#ba1a1a]'}`}
+              className={`block h-3 w-3 ${result.ok ? 'bg-state-success' : 'bg-state-error'}`}
               aria-hidden
             />
-            <span className="text-sm font-bold uppercase tracking-wider text-[#191c1e]">
+            <span className="text-sm font-bold uppercase tracking-wider text-ink">
               Supabase Bağlantısı
             </span>
-            <span className={`ml-auto text-xs font-mono font-bold ${result.ok ? 'text-[#10B981]' : 'text-[#ba1a1a]'}`}>
+            <span className={`ml-auto text-xs font-mono font-bold ${result.ok ? 'text-state-success' : 'text-state-error'}`}>
               {result.ok ? 'BAĞLANDI' : 'HATA'}
             </span>
           </div>
 
           {!result.ok && (
-            <div className="bg-[#ffdad6] border border-[#ba1a1a] px-4 py-3">
-              <p className="text-sm font-mono text-[#93000a]">{result.error}</p>
+            <div className="bg-error-container border border-error px-4 py-3">
+              <p className="text-sm font-mono text-on-error-container">{result.error}</p>
             </div>
           )}
 
           {result.ok && (
             <div className="flex flex-col gap-1">
-              <p className="text-xs uppercase tracking-wider text-[#827560] mb-2">
+              <p className="text-xs uppercase tracking-wider text-ink-muted mb-2">
                 categories tablosu — ilk 5 aktif kategori
               </p>
               {result.categories.length === 0 ? (
-                <p className="text-sm text-[#504533]">Kayıt yok (seed çalıştırıldı mı?)</p>
+                <p className="text-sm text-ink-secondary">Kayıt yok (seed çalıştırıldı mı?)</p>
               ) : (
-                <ul className="flex flex-col divide-y divide-[#eceef0]">
+                <ul className="flex flex-col divide-y divide-surface-container">
                   {result.categories.map((cat) => (
                     <li key={cat.id} className="flex items-center gap-4 py-2">
-                      <span className="text-sm font-medium text-[#191c1e] w-40 truncate">
+                      <span className="text-sm font-medium text-ink w-40 truncate">
                         {cat.name}
                       </span>
-                      <span className="text-xs font-mono text-[#827560]">{cat.slug}</span>
+                      <span className="text-xs font-mono text-ink-muted">{cat.slug}</span>
                     </li>
                   ))}
                 </ul>
@@ -98,8 +98,8 @@ export default async function HealthPage() {
         </div>
 
         {/* Env durumu — değer gösterilmez, sadece var/yok */}
-        <div className="border border-[#d4c4ac] bg-white p-6 flex flex-col gap-3">
-          <p className="text-xs uppercase tracking-wider font-bold text-[#827560]">
+        <div className="border border-border bg-surface-container-lowest p-6 flex flex-col gap-3">
+          <p className="text-xs uppercase tracking-wider font-bold text-ink-muted">
             Environment Değişkenleri
           </p>
           {[
@@ -109,19 +109,19 @@ export default async function HealthPage() {
           ].map(([key, value]) => (
             <div key={key} className="flex items-center gap-3">
               <span
-                className={`block h-2 w-2 flex-shrink-0 ${value ? 'bg-[#10B981]' : 'bg-[#ba1a1a]'}`}
+                className={`block h-2 w-2 flex-shrink-0 ${value ? 'bg-state-success' : 'bg-state-error'}`}
                 aria-hidden
               />
-              <span className="text-xs font-mono text-[#191c1e]">{key}</span>
-              <span className={`ml-auto text-xs font-bold ${value ? 'text-[#10B981]' : 'text-[#ba1a1a]'}`}>
+              <span className="text-xs font-mono text-ink">{key}</span>
+              <span className={`ml-auto text-xs font-bold ${value ? 'text-state-success' : 'text-state-error'}`}>
                 {value ? 'TANIMLI' : 'EKSİK'}
               </span>
             </div>
           ))}
         </div>
 
-        <p className="text-xs text-[#827560] text-center">
-          Bu sayfa yalnızca <code className="font-mono bg-[#eceef0] px-1">NODE_ENV=development</code> ortamında görünür.
+        <p className="text-xs text-ink-muted text-center">
+          Bu sayfa yalnızca <code className="font-mono bg-surface-container px-1">NODE_ENV=development</code> ortamında görünür.
         </p>
       </div>
     </main>

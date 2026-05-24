@@ -115,6 +115,25 @@ The palette is rooted in the functional visual cues of a construction site.
 - **Backgrounds:** The primary interface uses clean white (#FFFFFF) to maintain a high-contrast environment for readability. Secondary containers and layout sections use a cool light gray (#F8FAFC) to define hierarchy without adding visual weight.
 - **Functional Colors:** Success and warning states use high-visibility green and amber, mimicking safety signal lights.
 
+### Token Kullanım Standardı (uyulması zorunlu)
+
+`packages/ui/src/tokens/colors.ts` Material 3 semantik şemasını taşır. M3'te `primary` rolü "yüksek kontrast fill + on-primary metni" için tasarlanmıştır; bu yüzden M3 `primary` = `#7a5900` (koyu olive, WCAG AA), `primary-container` = `#f4b400` (hazard yellow).
+
+İnşaat Borsam'ın markası **hazard yellow**'a dayalı olduğundan kod tarafında şu standart uygulanır:
+
+| Niyet | Kullan | Kullanma |
+|---|---|---|
+| Hazard yellow CTA / brand vurgu | `bg-brand` / `text-brand` / `border-brand` | `bg-primary` (koyu olive üretir) |
+| Yellow üzerinde yazı | `text-navy` veya `text-ink` | `text-on-primary` (beyaz → kontrastsız) |
+| Sarı container, açık ton | `bg-primary-container` | — |
+| Soluk sarı highlight | `bg-brand-light` (`#ffdea3`) | — |
+
+`bg-primary`/`text-primary` M3 ile uyumlu yerlerde (örn. internal admin tablolarında high-contrast badge) bilinçli olarak kullanılabilir — ama brand identity gerektiğinde **daima** `brand` ailesini seç. Detay: `packages/ui/src/tokens/colors.ts` dosya başı yorum bloğu.
+
+### Dark Mode Politikası (Faz 1)
+
+**MVP'de otomatik dark mode YOK.** `@media (prefers-color-scheme: dark)` bloğu `scripts/sync-theme.ts` tarafından emit edilmiyor. `colorsDark` paleti dosyada saklı kalıyor ama yalnız ileride manuel `data-theme="dark"` opt-in için. Şu an site her ortamda açık/krem/beyaz Industrial Precision görünür.
+
 ## Typography
 This design system utilizes **Inter** for its neutral, technical character and exceptional legibility at small sizes. 
 

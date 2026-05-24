@@ -1,5 +1,13 @@
 // Industrial Precision renk paleti — Material 3 semantic tokens + pratik alias'lar.
 // Hex değerlerinin tek doğru kaynağı bu dosya. CLAUDE.md tablosu marketing iletişimi için.
+//
+// ─── KULLANIM STANDARDI (uyulması zorunlu) ────────────────────────────────
+// Hazard yellow CTA / marka vurgusu için DAİMA `bg-brand` / `text-brand` /
+// `border-brand` kullan. `bg-primary` M3 semantiği gereği koyu olive (#7a5900)
+// üretir — WCAG kontrastı için bilinçli bir karar, "yanlış renk" değil. Sarı
+// CTA fonu beklediğin yerde `bg-primary` yazma. Yazı: navy (`text-navy` /
+// `text-ink`). Detay: docs/08-DESIGN.md → "Token Kullanım Standardı".
+// ──────────────────────────────────────────────────────────────────────────
 
 export const colorsLight = {
   // ----- Surfaces -----

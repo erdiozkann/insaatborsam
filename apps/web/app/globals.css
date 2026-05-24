@@ -8,7 +8,11 @@
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
 
 /* HTML/body baseline — surface, font ve text rengi token-bazlı */
+/* color-scheme: light → browser'ın form input, scrollbar, dropdown gibi UA */
+/* öğelerini OS dark modda bile açık temada renderlamasını zorlar. MVP'de */
+/* otomatik dark mode YOK; bu satır o politikanın UA-level karşılığı. */
 html {
+  color-scheme: light;
   font-family: var(--font-sans);
   background-color: var(--color-background);
   color: var(--color-on-background);
@@ -111,71 +115,5 @@ body {
   --shadow-hard-modal: 0px 4px 0px 0px rgba(25, 28, 30, 0.20);
   --shadow-hard-popover: 0px 2px 0px 0px rgba(25, 28, 30, 0.15);
   --shadow-hard-pressed: inset 0px 2px 0px 0px rgba(25, 28, 30, 0.10);
-}
-
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background: #111416;
-    --color-surface: #111416;
-    --color-surface-dim: #111416;
-    --color-surface-bright: #37393c;
-    --color-surface-container-lowest: #0b0e10;
-    --color-surface-container-low: #191c1e;
-    --color-surface-container: #1d2022;
-    --color-surface-container-high: #272a2c;
-    --color-surface-container-highest: #323537;
-    --color-surface-variant: #4a4639;
-    --color-inverse-surface: #e2e2e5;
-    --color-inverse-on-surface: #2d3133;
-    --color-on-background: #e2e2e5;
-    --color-on-surface: #e2e2e5;
-    --color-on-surface-variant: #d4c4ac;
-    --color-outline: #9d8e72;
-    --color-outline-variant: #4f4633;
-    --color-primary: #fdbc13;
-    --color-on-primary: #402d00;
-    --color-primary-container: #5d4200;
-    --color-on-primary-container: #ffdea3;
-    --color-inverse-primary: #7a5900;
-    --color-primary-fixed: #ffdea3;
-    --color-primary-fixed-dim: #fdbc13;
-    --color-on-primary-fixed: #261900;
-    --color-on-primary-fixed-variant: #5d4200;
-    --color-surface-tint: #fdbc13;
-    --color-secondary: #bcc7de;
-    --color-on-secondary: #263141;
-    --color-secondary-container: #3c475a;
-    --color-on-secondary-container: #d8e3fb;
-    --color-secondary-fixed: #d8e3fb;
-    --color-secondary-fixed-dim: #bcc7de;
-    --color-on-secondary-fixed: #111c2d;
-    --color-on-secondary-fixed-variant: #3c475a;
-    --color-tertiary: #4edea3;
-    --color-on-tertiary: #003822;
-    --color-tertiary-container: #005236;
-    --color-on-tertiary-container: #6ffbbe;
-    --color-tertiary-fixed: #6ffbbe;
-    --color-tertiary-fixed-dim: #4edea3;
-    --color-on-tertiary-fixed: #002113;
-    --color-on-tertiary-fixed-variant: #005236;
-    --color-error: #ffb4ab;
-    --color-on-error: #690005;
-    --color-error-container: #93000a;
-    --color-on-error-container: #ffdad6;
-    --color-brand: #f4b400;
-    --color-brand-dark: #7a5900;
-    --color-brand-light: #ffdea3;
-    --color-navy: #2d3133;
-    --color-ink: #191c1e;
-    --color-ink-secondary: #504533;
-    --color-ink-muted: #827560;
-    --color-border: #d4c4ac;
-    --color-border-strong: #2d3133;
-    --color-state-success: #10b981;
-    --color-state-warning: #f4b400;
-    --color-state-error: #ba1a1a;
-    --color-state-info: #0ea5e9;
-    --color-state-neutral: #64748b;
-  }
 }
 /* THEME-SYNC:END */

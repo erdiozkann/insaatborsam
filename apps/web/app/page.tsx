@@ -18,7 +18,7 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="border border-border-default bg-surface-container-lowest px-8 py-6 w-full max-w-md">
+        <div className="border border-border bg-surface-container-lowest px-8 py-6 w-full max-w-md">
           <div className="flex items-center gap-3">
             <span
               aria-hidden

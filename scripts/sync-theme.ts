@@ -1,6 +1,10 @@
 // Token tek doğru kaynağı: packages/ui/src/tokens/
 // Bu script tokens'tan apps/web/app/globals.css içindeki @theme bloğunu otomatik üretir.
 // predev + prebuild hook'larıyla otomatik koşar; manuel: pnpm theme:sync
+//
+// MVP politikası: otomatik dark mode YOK. Sadece light tema üretilir.
+// `prefers-color-scheme: dark` bloğu bilinçli olarak emit edilmez —
+// `colorsDark` paleti ileride manuel `data-theme="dark"` opt-in için saklanıyor.
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
@@ -53,19 +57,8 @@ function buildLightBlock(): string {
   return lines.join("\n");
 }
 
-function buildDarkBlock(): string {
-  const lines = [
-    "@media (prefers-color-scheme: dark) {",
-    "  @theme {",
-    ...cssTheme(colors.dark).map((line) => `  ${line}`),
-    "  }",
-    "}",
-  ];
-  return lines.join("\n");
-}
-
 function buildGeneratedBlock(): string {
-  return [BEGIN_MARKER, buildLightBlock(), "", buildDarkBlock(), END_MARKER].join("\n");
+  return [BEGIN_MARKER, buildLightBlock(), END_MARKER].join("\n");
 }
 
 function syncGlobalsCss(): void {
