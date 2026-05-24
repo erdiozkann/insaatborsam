@@ -115,5 +115,8 @@ body {
   --shadow-hard-modal: 0px 4px 0px 0px rgba(25, 28, 30, 0.20);
   --shadow-hard-popover: 0px 2px 0px 0px rgba(25, 28, 30, 0.15);
   --shadow-hard-pressed: inset 0px 2px 0px 0px rgba(25, 28, 30, 0.10);
+
+  /* ----- Layout ----- */
+  --max-w-container: 1280px;
 }
 /* THEME-SYNC:END */

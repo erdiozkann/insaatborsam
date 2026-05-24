@@ -14,6 +14,7 @@ import { colors, cssTheme } from "../packages/ui/src/tokens/colors";
 import { radius } from "../packages/ui/src/tokens/radius";
 import { shadow } from "../packages/ui/src/tokens/shadow";
 import { fontFamily } from "../packages/ui/src/tokens/typography";
+import { layout } from "../packages/ui/src/tokens/spacing";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, "..");
@@ -38,6 +39,10 @@ function fontLines(): string[] {
   );
 }
 
+function containerLines(): string[] {
+  return [`  --max-w-container: ${layout["container-max"]};`];
+}
+
 function buildLightBlock(): string {
   const lines = [
     "@theme {",
@@ -52,6 +57,9 @@ function buildLightBlock(): string {
     "",
     "  /* ----- Shadows (sadece modal/popover/pressed) ----- */",
     ...shadowLines(),
+    "",
+    "  /* ----- Layout ----- */",
+    ...containerLines(),
     "}",
   ];
   return lines.join("\n");

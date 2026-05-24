@@ -20,7 +20,7 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "clean": "turbo run clean && rm -rf node_modules",
-    "db:types": "echo 'TODO Sprint 1: supabase gen types typescript --linked > packages/database/src/types.ts'"
+    "db:types": "supabase gen types typescript --linked > packages/database/src/types.ts"
   },
   "devDependencies": {
     "tsx": "^4.22.2",
