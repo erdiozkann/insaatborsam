@@ -239,9 +239,15 @@ export default async function ProfilPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="p-5 border-t border-border">
+                  <div className="p-5 border-t border-border flex items-center justify-between gap-3">
                     <Link href="/profil/tamamla" className="text-xs text-navy underline font-medium">
                       Alıcı bilgilerini güncelle
+                    </Link>
+                    <Link
+                      href="/alici/panel"
+                      className="bg-brand text-navy font-bold text-xs uppercase tracking-wider px-4 py-2 hover:opacity-90 transition-opacity"
+                    >
+                      Alıcı Paneli →
                     </Link>
                   </div>
                 </div>
@@ -277,10 +283,25 @@ export default async function ProfilPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="p-5 border-t border-border">
+                  <div className="p-5 border-t border-border flex items-center justify-between gap-3">
                     <Link href="/satici/onboarding" className="text-xs text-navy underline font-medium">
                       Mağaza bilgilerini güncelle
                     </Link>
+                    {sellerProfile.is_verified ? (
+                      <Link
+                        href="/satici/panel"
+                        className="bg-brand text-navy font-bold text-xs uppercase tracking-wider px-4 py-2 hover:opacity-90 transition-opacity"
+                      >
+                        Satıcı Paneli →
+                      </Link>
+                    ) : (
+                      <Link
+                        href="/satici/panel"
+                        className="border border-border text-navy font-bold text-xs uppercase tracking-wider px-4 py-2 hover:bg-surface-container transition-colors"
+                      >
+                        Doğrulama Durumunu Görüntüle →
+                      </Link>
+                    )}
                   </div>
                 </div>
               )}
@@ -292,6 +313,22 @@ export default async function ProfilPage() {
                   Hızlı Erişim
                 </h3>
                 <nav className="flex flex-col gap-3">
+                  {profile.role === 'buyer' && buyerProfile && (
+                    <Link
+                      href="/alici/panel"
+                      className="text-sm font-bold text-navy hover:opacity-80 transition-opacity"
+                    >
+                      Alıcı Paneli
+                    </Link>
+                  )}
+                  {profile.role === 'seller' && sellerProfile && (
+                    <Link
+                      href="/satici/panel"
+                      className="text-sm font-bold text-navy hover:opacity-80 transition-opacity"
+                    >
+                      {sellerProfile.is_verified ? 'Satıcı Paneli' : 'Doğrulama Durumumu'}
+                    </Link>
+                  )}
                   <Link
                     href="/profil/duzenle"
                     className="text-sm text-ink-secondary hover:text-ink transition-colors"

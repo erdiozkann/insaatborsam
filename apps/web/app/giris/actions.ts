@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { getPostLoginRedirect, isLocalPath } from '@/lib/auth/redirects'
 
 export type LoginState =
   | { phase: 'phone'; error?: string }
@@ -101,11 +102,23 @@ export async function loginAction(
       return { phase: 'otp', phone: parsed.data.phone, error: 'Kod geçersiz veya süresi dolmuş.' }
     }
 
-    // Redirect after successful OTP — the `redirect` call type-satisfier below is unreachable
-    const redirectTo = String(formData.get('redirect_to') ?? '/profil')
-    const safe =
-      redirectTo.startsWith('/') && !redirectTo.startsWith('//') ? redirectTo : '/profil'
-    redirect(safe)
+    // Explicit redirect param — honor if safe local path
+    const redirectParam = String(formData.get('redirect_to') ?? '').trim()
+    if (redirectParam && isLocalPath(redirectParam)) {
+      redirect(redirectParam)
+    }
+
+    // Smart redirect based on role + onboarding state
+    const {
+      data: { user: authedUser },
+    } = await supabase.auth.getUser()
+
+    if (authedUser) {
+      const destination = await getPostLoginRedirect(authedUser.id)
+      redirect(destination)
+    }
+
+    redirect('/profil')
   }
 
   return { phase: 'phone', error: 'Geçersiz istek.' }
