@@ -3,6 +3,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 
 const inter = Inter({
   subsets: ["latin", "latin-ext"],
@@ -17,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s | İnşaat Borsam",
   },
   description:
-    "Türkiye inşaat sektörü için yapay zeka destekli dijital tedarik borsası. Müteahhitler, yapı malzemesi satıcıları ve nakliyecileri tek platformda buluşturur.",
+    "Türkiye inşaat sektörü için yapay zeka destekli dijital tedarik platformu. Müteahhitler ve yapı malzemesi satıcılarını tek platformda buluşturur.",
   metadataBase: new URL("https://insaatborsam.com"),
   openGraph: {
     type: "website",
@@ -37,7 +39,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="tr" className={inter.variable}>
-      <body className="bg-background text-on-background">{children}</body>
+      <body className="bg-background text-on-background">
+        <Navbar />
+        {children}
+        <Footer />
+      </body>
     </html>
   );
 }
