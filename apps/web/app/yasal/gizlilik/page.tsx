@@ -40,7 +40,7 @@ export default function GizlilikPage() {
       <h2 className={h2}>3. Güvenlik</h2>
       <p className={p}>
         Veriler şifreli bağlantı (TLS 1.3) üzerinden iletilir. Veritabanı erişimi Row Level
-        Security ile kısıtlanmıştır. Ödeme verileri BDDK lisanslı Iyzico tarafından işlenir.
+        Security ile kısıtlanmıştır. Ödeme verileri Iyzico altyapısı üzerinden 3D Secure ile işlenir.
       </p>
 
       <h2 className={h2}>4. Üçüncü Taraflarla Paylaşım</h2>

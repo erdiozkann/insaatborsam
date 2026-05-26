@@ -24,7 +24,7 @@ export function Footer() {
           <div className="md:col-span-1 flex flex-col gap-4">
             <Logo size="sm" />
             <p className="text-sm text-ink-muted leading-6">
-              İnşaatın dijital borsası. Müteahhitler, satıcılar ve nakliyecileri tek platformda buluşturur.
+              İnşaatın dijital borsası. Müteahhitler ve yapı malzemesi satıcılarını tek platformda buluşturur.
             </p>
           </div>
 

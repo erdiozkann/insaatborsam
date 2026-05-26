@@ -82,7 +82,7 @@ const advantages = [
   },
   {
     title: "Güvenli Ödeme",
-    desc: "BDDK onaylı Iyzico altyapısı. 3D Secure zorunlu. Kart bilgileri sistemimizde saklanmaz.",
+    desc: "Iyzico altyapısı ile 3D Secure destekli ödeme. Kart bilgileri sistemimizde saklanmaz.",
   },
   {
     title: "Gerçek Zamanlı Takip",

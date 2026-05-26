@@ -128,7 +128,7 @@ const faq = [
   },
   {
     q: "Kart bilgilerim güvende mi?",
-    a: "Evet. Tüm ödemeler BDDK lisanslı Iyzico altyapısı üzerinden işlenir. Kart bilgileri hiçbir zaman sistemlerimizde saklanmaz.",
+    a: "Evet. Tüm ödemeler Iyzico altyapısı üzerinden 3D Secure ile işlenir. Kart bilgileri hiçbir zaman sistemlerimizde saklanmaz.",
   },
   {
     q: "Üyelik nereden satın alınır?",

@@ -5,7 +5,7 @@ import { SellerForm } from "./SellerForm";
 export const metadata: Metadata = {
   title: "Satıcı Ol",
   description:
-    "İnşaat Borsam'a satıcı olarak katıl. 50+ müteahhitle bağlan, RFQ inbox ile teklif ver, ilk 3 ay komisyonsuz sat.",
+    "İnşaat Borsam'a satıcı olarak katıl. Dijital teklif talebi kutusuyla siparişleri yönet, ilk 3 ay komisyonsuz sat.",
   openGraph: {
     title: "Satıcı Ol | İnşaat Borsam",
     url: "https://insaatborsam.com/satici-ol",
@@ -86,7 +86,7 @@ export default async function SaticiOlPage({ searchParams }: Props) {
                 </h2>
                 <ul className="flex flex-col gap-3">
                   {[
-                    "50+ doğrulanmış alıcıya erişim",
+                    "Doğrulanmış alıcılara erişim",
                     "Dijital RFQ inbox",
                     "Otomatik sipariş akışı",
                     "İlk 3 ay komisyonsuz",
