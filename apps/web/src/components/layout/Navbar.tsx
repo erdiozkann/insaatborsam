@@ -33,7 +33,13 @@ export function Navbar() {
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center">
+          <div className="hidden md:flex items-center gap-4">
+            <Link
+              href="/giris"
+              className="text-sm font-medium text-ink-secondary hover:text-ink transition-colors"
+            >
+              Giriş Yap
+            </Link>
             <Link
               href="/satici-ol"
               className="bg-brand text-navy font-bold text-sm uppercase tracking-wider px-5 py-2.5 hover:opacity-90 transition-opacity min-h-11 flex items-center"
@@ -80,6 +86,13 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
+            <Link
+              href="/giris"
+              className="text-base font-medium text-ink py-3 border-b border-border"
+              onClick={() => setOpen(false)}
+            >
+              Giriş Yap
+            </Link>
             <Link
               href="/satici-ol"
               className="bg-brand text-navy font-bold text-sm uppercase tracking-wider px-5 py-3 text-center min-h-11 flex items-center justify-center mt-3"
