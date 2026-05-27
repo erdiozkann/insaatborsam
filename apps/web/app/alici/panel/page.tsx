@@ -9,6 +9,24 @@ export const metadata: Metadata = {
   robots: { index: false },
 }
 
+const STATUS_LABELS: Record<string, string> = {
+  open: 'Açık',
+  evaluating: 'Değerlendiriliyor',
+  closed: 'Kapandı',
+  expired: 'Süresi Doldu',
+  cancelled: 'İptal Edildi',
+}
+
+function statusClass(status: string): string {
+  if (status === 'open') return 'text-state-success border border-state-success'
+  if (status === 'evaluating') return 'text-navy border border-navy'
+  return 'text-ink-muted border border-border'
+}
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
 export default async function AliciPanelPage() {
   const user = await getCurrentUser()
   if (!user) redirect('/giris?redirect=/alici/panel')
@@ -31,6 +49,14 @@ export default async function AliciPanelPage() {
 
   if (!buyerProfile) redirect('/profil/tamamla')
 
+  const { data: recentRfqs } = await supabase
+    .from('rfqs')
+    .select('id, title, status, offer_count, created_at')
+    .eq('buyer_id', buyerProfile.id)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false })
+    .limit(5)
+
   const tierLabel =
     buyerProfile.subscription_tier === 'pro'
       ? 'Pro'
@@ -40,7 +66,6 @@ export default async function AliciPanelPage() {
 
   return (
     <>
-      {/* Sayfa başlığı */}
       <section className="bg-surface border-b border-border py-10">
         <div className="w-full max-w-container mx-auto px-5 md:px-12">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
@@ -62,6 +87,12 @@ export default async function AliciPanelPage() {
             </div>
             <div className="flex items-center gap-3">
               <Link
+                href="/alici/rfq/yeni"
+                className="bg-brand text-navy font-bold text-sm uppercase tracking-wider px-5 py-2 hover:opacity-90 transition-opacity"
+              >
+                + Yeni Teklif Talebi
+              </Link>
+              <Link
                 href="/profil"
                 className="border border-border-strong text-navy font-bold text-xs uppercase tracking-wider px-4 py-2 hover:bg-surface-container transition-colors"
               >
@@ -72,7 +103,6 @@ export default async function AliciPanelPage() {
         </div>
       </section>
 
-      {/* İçerik */}
       <section className="bg-surface py-10 md:py-16">
         <div className="w-full max-w-container mx-auto px-5 md:px-12">
 
@@ -87,64 +117,69 @@ export default async function AliciPanelPage() {
             </div>
           </div>
 
-          {/* Placeholder kartlar */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-            {/* Teklif Talebi */}
-            <div className="border border-border bg-surface-container-lowest">
-              <div className="bg-surface-container px-5 py-3 border-b border-border">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-navy">
-                  Teklif Talebi Oluştur
-                </h3>
-              </div>
-              <div className="p-6 flex flex-col items-center justify-center min-h-[140px] gap-3">
-                <p className="text-sm text-ink-muted text-center leading-6">
-                  Birden fazla satıcıdan aynı anda fiyat teklifi alın.
-                </p>
-                <span className="text-xs font-bold uppercase tracking-wider border border-border text-ink-muted px-3 py-1">
-                  Yakında
-                </span>
-              </div>
+          {/* Son Teklif Talepleri */}
+          <div className="border border-border bg-surface-container-lowest mb-8">
+            <div className="bg-surface-container px-5 py-3 border-b border-border flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-navy">Son Teklif Taleplerim</h3>
+              <Link
+                href="/alici/rfq"
+                className="text-xs text-navy underline font-medium"
+              >
+                Tümünü Gör
+              </Link>
             </div>
 
-            {/* Aktif Talepler */}
-            <div className="border border-border bg-surface-container-lowest">
-              <div className="bg-surface-container px-5 py-3 border-b border-border">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-navy">
-                  Aktif Taleplerim
-                </h3>
-              </div>
-              <div className="p-6 flex flex-col items-center justify-center min-h-[140px] gap-3">
-                <p className="text-sm text-ink-muted text-center leading-6">
-                  Açık teklif taleplerinizi ve gelen teklifleri buradan takip edeceksiniz.
+            {!recentRfqs || recentRfqs.length === 0 ? (
+              <div className="p-8 flex flex-col items-center gap-3 text-center">
+                <p className="text-sm text-ink-muted leading-6">
+                  Henüz teklif talebi oluşturmadınız.
                 </p>
-                <span className="text-xs font-bold uppercase tracking-wider border border-border text-ink-muted px-3 py-1">
-                  Yakında
-                </span>
+                <Link
+                  href="/alici/rfq/yeni"
+                  className="bg-brand text-navy font-bold text-sm uppercase tracking-wider px-5 py-2 hover:opacity-90 transition-opacity"
+                >
+                  İlk Talebi Oluştur →
+                </Link>
               </div>
-            </div>
-
-            {/* Satıcı Teklifleri */}
-            <div className="border border-border bg-surface-container-lowest">
-              <div className="bg-surface-container px-5 py-3 border-b border-border">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-navy">
-                  Satıcı Teklifleri
-                </h3>
+            ) : (
+              <div className="divide-y divide-border">
+                {recentRfqs.map((rfq) => (
+                  <Link
+                    key={rfq.id}
+                    href={`/alici/rfq/${rfq.id}`}
+                    className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-surface-container transition-colors group"
+                  >
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-sm font-bold text-ink group-hover:text-navy transition-colors truncate">
+                        {rfq.title}
+                      </span>
+                      <span className="text-xs text-ink-muted">{formatDate(rfq.created_at)}</span>
+                    </div>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      {rfq.offer_count > 0 && (
+                        <span className="text-xs font-bold text-state-success tabular-nums">
+                          {rfq.offer_count} Teklif
+                        </span>
+                      )}
+                      <span
+                        className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 ${statusClass(rfq.status)}`}
+                      >
+                        {STATUS_LABELS[rfq.status] ?? rfq.status}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+                <div className="px-5 py-3">
+                  <Link href="/alici/rfq" className="text-xs text-navy underline font-medium">
+                    Tüm talepleri görüntüle →
+                  </Link>
+                </div>
               </div>
-              <div className="p-6 flex flex-col items-center justify-center min-h-[140px] gap-3">
-                <p className="text-sm text-ink-muted text-center leading-6">
-                  Satıcılardan gelen teklifleri karşılaştırıp en uygununu seçin.
-                </p>
-                <span className="text-xs font-bold uppercase tracking-wider border border-border text-ink-muted px-3 py-1">
-                  Yakında
-                </span>
-              </div>
-            </div>
-
+            )}
           </div>
 
           {/* Alt bilgi */}
-          <div className="mt-10 border-t border-border pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="border-t border-border pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <p className="text-xs text-ink-muted uppercase tracking-wider font-bold mb-1">
                 Üyelik Planınız
