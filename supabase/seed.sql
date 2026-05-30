@@ -33,7 +33,7 @@ INSERT INTO auth.users (
     crypt('Test1234!', gen_salt('bf')),
     NOW(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Mehmet Müteahhit","role":"buyer","consent_kvkk":"true","preferred_language":"tr"}',
+    '{"full_name":"Mehmet Müteahhit","role":"buyer","consent_kvkk":"true","consent_marketing":"false","preferred_language":"tr"}',
     NOW(), NOW(), '', '', '', ''
   ),
   (
@@ -44,7 +44,7 @@ INSERT INTO auth.users (
     crypt('Test1234!', gen_salt('bf')),
     NOW(),
     '{"provider":"email","providers":["email"]}',
-    '{"full_name":"Ayşe Nalbur","role":"seller","consent_kvkk":"true","preferred_language":"tr"}',
+    '{"full_name":"Ayşe Nalbur","role":"seller","consent_kvkk":"true","consent_marketing":"false","preferred_language":"tr"}',
     NOW(), NOW(), '', '', '', ''
   )
 ON CONFLICT (id) DO NOTHING;
