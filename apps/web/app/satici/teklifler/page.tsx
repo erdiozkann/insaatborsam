@@ -3,24 +3,15 @@ import Link from 'next/link'
 import { requireSellerProfile } from '@/lib/seller/guards'
 import { createClient } from '@/lib/supabase/server'
 import { SellerPendingScreen } from '@/components/seller/SellerPendingScreen'
+import {
+  offerStatusLabel,
+  offerStatusBadgeClass,
+  offerStatusSellerDescription,
+} from '@/lib/rfq/offer-status'
 
 export const metadata: Metadata = {
   title: 'Tekliflerim | İnşaat Borsam',
   robots: { index: false },
-}
-
-const OFFER_STATUS_LABELS: Record<string, string> = {
-  pending: 'Beklemede',
-  accepted: 'Kabul Edildi',
-  rejected: 'Reddedildi',
-  expired: 'Süresi Doldu',
-  withdrawn: 'Geri Çekildi',
-}
-
-function offerStatusClass(status: string): string {
-  if (status === 'accepted') return 'text-state-success border border-state-success'
-  if (status === 'pending') return 'text-navy border border-navy'
-  return 'text-ink-muted border border-border'
 }
 
 function formatDate(iso: string): string {
@@ -121,15 +112,18 @@ export default async function SaticiTekliflerPage() {
                       </span>
                       <span className="text-xs text-ink-muted">{formatDate(offer.created_at)}</span>
                     </div>
+                    <span className="text-xs text-ink-secondary leading-5">
+                      {offerStatusSellerDescription(offer.status)}
+                    </span>
                   </div>
                   <div className="flex items-center gap-3 flex-shrink-0">
                     <span className="text-sm font-bold text-ink tabular-nums">
                       {formatCents(offer.total_price_cents)}
                     </span>
                     <span
-                      className={`text-xs font-bold uppercase tracking-wider px-2 py-1 ${offerStatusClass(offer.status)}`}
+                      className={`text-xs font-bold uppercase tracking-wider px-2 py-1 ${offerStatusBadgeClass(offer.status)}`}
                     >
-                      {OFFER_STATUS_LABELS[offer.status] ?? offer.status}
+                      {offerStatusLabel(offer.status)}
                     </span>
                     <span className="text-ink-muted text-sm">→</span>
                   </div>
