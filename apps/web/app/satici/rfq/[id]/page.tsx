@@ -5,6 +5,11 @@ import { requireSellerProfile } from '@/lib/seller/guards'
 import { createClient } from '@/lib/supabase/server'
 import { SellerPendingScreen } from '@/components/seller/SellerPendingScreen'
 import { OfferForm } from './OfferForm'
+import {
+  offerStatusSellerLabel,
+  offerStatusSellerDescription,
+  offerStatusBadgeClass,
+} from '@/lib/rfq/offer-status'
 
 export const metadata: Metadata = {
   title: 'Teklif Talebi | İnşaat Borsam',
@@ -19,14 +24,6 @@ const STATUS_LABELS: Record<string, string> = {
   closed: 'Kapandı',
   expired: 'Süresi Doldu',
   cancelled: 'İptal Edildi',
-}
-
-const OFFER_STATUS_LABELS: Record<string, string> = {
-  pending: 'Beklemede',
-  accepted: 'Kabul Edildi',
-  rejected: 'Reddedildi',
-  expired: 'Süresi Doldu',
-  withdrawn: 'Geri Çekildi',
 }
 
 function statusClass(status: string): string {
@@ -200,17 +197,19 @@ export default async function SaticiRfqDetailPage({ params }: Props) {
             {/* Sağ panel — teklif durumu / form */}
             <aside className="flex flex-col gap-4">
               {ownOffer ? (
-                <div className="border border-state-success bg-surface-container-lowest">
-                  <div className="bg-surface-container px-5 py-3 border-b border-border">
+                <div className="border border-border bg-surface-container-lowest">
+                  <div className="bg-surface-container px-5 py-3 border-b border-border flex items-center justify-between gap-3">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-navy">Verdiğiniz Teklif</h3>
+                    <span className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 ${offerStatusBadgeClass(ownOffer.status)}`}>
+                      {offerStatusSellerLabel(ownOffer.status)}
+                    </span>
+                  </div>
+                  <div className="px-5 py-3 border-b border-border">
+                    <p className="text-xs text-ink-secondary leading-5">
+                      {offerStatusSellerDescription(ownOffer.status)}
+                    </p>
                   </div>
                   <div className="divide-y divide-border">
-                    <div className="px-5 py-4 flex justify-between items-center gap-4">
-                      <span className="text-xs text-ink-muted uppercase tracking-wider">Durum</span>
-                      <span className="text-xs font-bold uppercase tracking-wider text-state-success">
-                        {OFFER_STATUS_LABELS[ownOffer.status] ?? ownOffer.status}
-                      </span>
-                    </div>
                     <div className="px-5 py-4 flex justify-between items-center gap-4">
                       <span className="text-xs text-ink-muted uppercase tracking-wider">Birim Fiyat</span>
                       <span className="text-sm font-bold text-ink tabular-nums">{formatCents(ownOffer.unit_price_cents)}</span>

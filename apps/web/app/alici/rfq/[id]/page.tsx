@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { requireBuyer } from '@/lib/rfq/guards'
 import { createClient } from '@/lib/supabase/server'
+import { isComparableOfferStatus } from '@/lib/rfq/offer-status'
+import { OfferComparisonCard, type OfferCardData } from './OfferComparisonCard'
 
 export const metadata: Metadata = {
   title: 'Teklif Talebi | İnşaat Borsam',
@@ -61,6 +63,41 @@ export default async function RfqDetailPage({ params }: Props) {
     .select('id, material_name, quantity, unit, notes, display_order, estimated_unit_price_cents')
     .eq('rfq_id', rfq.id)
     .order('display_order')
+
+  // Gelen teklifler (RLS: rfq_offers_select_buyer — sadece bu alıcının RFQ'larına gelenler).
+  // estimated_unit_price_cents gibi alıcı beklenti verileri burada değil; teklif gerçek fiyatları.
+  const { data: offersRaw } = await supabase
+    .from('rfq_offers')
+    .select(
+      'id, unit_price_cents, total_price_cents, delivery_time_days, notes, status, created_at, seller_profiles(store_name, company_name, primary_city, rating_avg, rating_count)',
+    )
+    .eq('rfq_id', rfq.id)
+    .order('total_price_cents', { ascending: true })
+
+  const offers = offersRaw ?? []
+  const comparable = offers.filter((o) => isComparableOfferStatus(o.status))
+  const minTotal = comparable.length > 0 ? Math.min(...comparable.map((o) => o.total_price_cents)) : null
+  const minDays = comparable.length > 0 ? Math.min(...comparable.map((o) => o.delivery_time_days)) : null
+
+  const offerCards: OfferCardData[] = offers.map((o) => {
+    const seller = o.seller_profiles
+    const comparableOffer = isComparableOfferStatus(o.status)
+    return {
+      id: o.id,
+      sellerName: seller?.store_name ?? seller?.company_name ?? 'Satıcı',
+      sellerCity: seller?.primary_city ?? null,
+      ratingAvg: seller?.rating_avg ?? null,
+      ratingCount: seller?.rating_count ?? null,
+      unitPriceCents: o.unit_price_cents,
+      totalPriceCents: o.total_price_cents,
+      deliveryTimeDays: o.delivery_time_days,
+      notes: o.notes,
+      status: o.status,
+      createdAt: o.created_at,
+      isCheapest: comparableOffer && minTotal !== null && o.total_price_cents === minTotal,
+      isFastest: comparableOffer && minDays !== null && o.delivery_time_days === minDays,
+    }
+  })
 
   const isActive = rfq.status === 'open' || rfq.status === 'evaluating'
 
@@ -180,6 +217,38 @@ export default async function RfqDetailPage({ params }: Props) {
                   </div>
                 </div>
               )}
+
+              {/* Gelen Teklifler */}
+              <div className="border border-border bg-surface-container-lowest">
+                <div className="p-5 border-b border-border">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-navy">
+                    Gelen Teklifler ({offers.length})
+                  </h2>
+                </div>
+
+                {offers.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <p className="text-sm text-ink-secondary leading-6">
+                      Bu talebe henüz teklif gelmedi. Davet edilen satıcılar teklif
+                      gönderdikçe burada listelenecek.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-5 flex flex-col gap-4">
+                    <div className="border border-border bg-surface-container px-4 py-3">
+                      <p className="text-xs text-ink-secondary leading-5">
+                        Teklifleri karşılaştırabilirsiniz.{' '}
+                        <strong className="text-ink">Kısa liste, reddet ve seç</strong>{' '}
+                        aksiyonları Sprint 6.1&apos;de açılacak; sipariş oluşturma ise
+                        sonraki aşamada.
+                      </p>
+                    </div>
+                    {offerCards.map((offer) => (
+                      <OfferComparisonCard key={offer.id} offer={offer} />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Sağ panel */}
