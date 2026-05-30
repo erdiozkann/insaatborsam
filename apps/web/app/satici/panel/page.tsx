@@ -3,10 +3,36 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getCurrentUser } from '@/lib/auth/get-current-user'
 import { createClient } from '@/lib/supabase/server'
+import { SellerPendingScreen } from '@/components/seller/SellerPendingScreen'
 
 export const metadata: Metadata = {
   title: 'Satıcı Paneli | İnşaat Borsam',
   robots: { index: false },
+}
+
+const RFQ_STATUS_LABELS: Record<string, string> = {
+  open: 'Açık',
+  evaluating: 'Değerlendiriliyor',
+  closed: 'Kapandı',
+  expired: 'Süresi Doldu',
+  cancelled: 'İptal Edildi',
+}
+
+const OFFER_STATUS_LABELS: Record<string, string> = {
+  pending: 'Beklemede',
+  accepted: 'Kabul Edildi',
+  rejected: 'Reddedildi',
+  expired: 'Süresi Doldu',
+  withdrawn: 'Geri Çekildi',
+}
+
+function formatCents(cents: number): string {
+  return new Intl.NumberFormat('tr-TR', {
+    style: 'currency',
+    currency: 'TRY',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(cents / 100)
 }
 
 export default async function SaticiPanelPage() {
@@ -17,7 +43,7 @@ export default async function SaticiPanelPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, full_name')
+    .select('role')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -31,62 +57,26 @@ export default async function SaticiPanelPage() {
 
   if (!sellerProfile) redirect('/satici/onboarding')
 
-  // Doğrulama bekleniyorsa panel açılmaz — durum ekranı gösterilir
+  // Doğrulama bekleniyorsa panel açılmaz — pending ekranı gösterilir.
   if (!sellerProfile.is_verified) {
-    return (
-      <>
-        <section className="bg-surface border-b border-border py-10">
-          <div className="w-full max-w-container mx-auto px-5 md:px-12">
-            <span className="text-xs font-bold uppercase tracking-wider text-ink-muted block mb-2">
-              Satıcı Paneli
-            </span>
-            <h1 className="text-[28px] font-extrabold tracking-tight text-ink leading-[36px]">
-              {sellerProfile.store_name}
-            </h1>
-          </div>
-        </section>
-
-        <section className="bg-surface py-16">
-          <div className="w-full max-w-container mx-auto px-5 md:px-12">
-            <div className="max-w-xl mx-auto border border-state-warning bg-surface-container-lowest">
-              <div className="bg-surface-container px-6 py-4 border-b border-border">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-navy">
-                  Doğrulama Bekleniyor
-                </h2>
-              </div>
-              <div className="p-8 flex flex-col gap-4">
-                <p className="text-sm text-ink leading-6">
-                  Mağaza profiliniz oluşturuldu:{' '}
-                  <strong>{sellerProfile.store_name}</strong>. Satış yapabilmek
-                  için ekibimiz tarafından doğrulanması gerekiyor.
-                </p>
-                <p className="text-sm text-ink-secondary leading-6">
-                  Başvurunuz inceleniyor. 24 iş saati içinde e-posta ve SMS ile
-                  bilgilendireceğiz.
-                </p>
-                <div className="flex items-center gap-3 pt-2">
-                  <Link
-                    href="/profil"
-                    className="bg-brand text-navy font-bold text-sm uppercase tracking-wider px-5 py-2 hover:opacity-90 transition-opacity"
-                  >
-                    Profilime Dön
-                  </Link>
-                  <Link
-                    href="/iletisim"
-                    className="border border-border text-navy font-bold text-sm uppercase tracking-wider px-5 py-2 hover:bg-surface-container transition-colors"
-                  >
-                    İletişim
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </>
-    )
+    return <SellerPendingScreen storeName={sellerProfile.store_name} sectionLabel="Satıcı Paneli" />
   }
 
-  // Doğrulanmış satıcı — panel shell
+  // Doğrulanmış satıcı — mini feed'ler (yalnızca RLS'in izin verdiği veriler).
+  const { data: recentRfqs } = await supabase
+    .from('rfqs')
+    .select('id, title, status, created_at')
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false })
+    .limit(4)
+
+  const { data: recentOffers } = await supabase
+    .from('rfq_offers')
+    .select('id, rfq_id, status, total_price_cents, created_at, rfqs(title)')
+    .eq('seller_id', sellerProfile.id)
+    .order('created_at', { ascending: false })
+    .limit(4)
+
   const tierLabel =
     sellerProfile.subscription_tier === 'pro'
       ? 'Pro'
@@ -125,6 +115,12 @@ export default async function SaticiPanelPage() {
             </div>
             <div className="flex items-center gap-3">
               <Link
+                href="/satici/rfq"
+                className="bg-brand text-navy font-bold text-xs uppercase tracking-wider px-4 py-2 hover:opacity-90 transition-opacity"
+              >
+                Gelen Talepler
+              </Link>
+              <Link
                 href="/profil"
                 className="border border-border-strong text-navy font-bold text-xs uppercase tracking-wider px-4 py-2 hover:bg-surface-container transition-colors"
               >
@@ -157,44 +153,83 @@ export default async function SaticiPanelPage() {
             </div>
           </div>
 
-          {/* Placeholder kartlar */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-            {/* Gelen Teklif Talepleri */}
-            <div className="border border-border bg-surface-container-lowest">
-              <div className="bg-surface-container px-5 py-3 border-b border-border">
+            {/* Gelen Teklif Talepleri — mini feed */}
+            <div className="border border-border bg-surface-container-lowest flex flex-col">
+              <div className="bg-surface-container px-5 py-3 border-b border-border flex items-center justify-between">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-navy">
                   Gelen Teklif Talepleri
                 </h3>
+                <Link href="/satici/rfq" className="text-xs text-navy underline font-medium">
+                  Tümü
+                </Link>
               </div>
-              <div className="p-6 flex flex-col items-center justify-center min-h-[140px] gap-3">
-                <p className="text-sm text-ink-muted text-center leading-6">
-                  Alıcılardan gelen teklif talepleri burada listelenecek.
-                </p>
-                <span className="text-xs font-bold uppercase tracking-wider border border-border text-ink-muted px-3 py-1">
-                  Yakında
-                </span>
+              <div className="flex-1 flex flex-col">
+                {!recentRfqs || recentRfqs.length === 0 ? (
+                  <div className="p-6 flex flex-col items-center justify-center min-h-[140px] gap-3">
+                    <p className="text-sm text-ink-muted text-center leading-6">
+                      Henüz size yönlendirilmiş talep yok.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border">
+                    {recentRfqs.map((rfq) => (
+                      <Link
+                        key={rfq.id}
+                        href={`/satici/rfq/${rfq.id}`}
+                        className="px-5 py-3 flex items-center justify-between gap-3 hover:bg-surface-container transition-colors"
+                      >
+                        <span className="text-sm text-ink truncate">{rfq.title}</span>
+                        <span className="text-xs text-ink-muted uppercase tracking-wider flex-shrink-0">
+                          {RFQ_STATUS_LABELS[rfq.status] ?? rfq.status}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Tekliflerim */}
-            <div className="border border-border bg-surface-container-lowest">
-              <div className="bg-surface-container px-5 py-3 border-b border-border">
+            {/* Tekliflerim — mini feed */}
+            <div className="border border-border bg-surface-container-lowest flex flex-col">
+              <div className="bg-surface-container px-5 py-3 border-b border-border flex items-center justify-between">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-navy">
                   Tekliflerim
                 </h3>
+                <Link href="/satici/teklifler" className="text-xs text-navy underline font-medium">
+                  Tümü
+                </Link>
               </div>
-              <div className="p-6 flex flex-col items-center justify-center min-h-[140px] gap-3">
-                <p className="text-sm text-ink-muted text-center leading-6">
-                  Gönderdiğiniz tekliflerin durumunu buradan takip edeceksiniz.
-                </p>
-                <span className="text-xs font-bold uppercase tracking-wider border border-border text-ink-muted px-3 py-1">
-                  Yakında
-                </span>
+              <div className="flex-1 flex flex-col">
+                {!recentOffers || recentOffers.length === 0 ? (
+                  <div className="p-6 flex flex-col items-center justify-center min-h-[140px] gap-3">
+                    <p className="text-sm text-ink-muted text-center leading-6">
+                      Henüz teklif vermediniz.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border">
+                    {recentOffers.map((offer) => (
+                      <Link
+                        key={offer.id}
+                        href={`/satici/rfq/${offer.rfq_id}`}
+                        className="px-5 py-3 flex items-center justify-between gap-3 hover:bg-surface-container transition-colors"
+                      >
+                        <span className="text-sm text-ink truncate">
+                          {offer.rfqs?.title ?? 'Teklif Talebi'}
+                        </span>
+                        <span className="text-xs font-bold text-ink tabular-nums flex-shrink-0">
+                          {formatCents(offer.total_price_cents)}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Üyelik & KYC */}
+            {/* Üyelik Durumu */}
             <div className="border border-border bg-surface-container-lowest">
               <div className="bg-surface-container px-5 py-3 border-b border-border">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-navy">
@@ -213,10 +248,7 @@ export default async function SaticiPanelPage() {
                   </span>
                 </div>
                 <div className="pt-2 border-t border-border">
-                  <Link
-                    href="/fiyatlar"
-                    className="text-xs text-navy underline font-medium"
-                  >
+                  <Link href="/fiyatlar" className="text-xs text-navy underline font-medium">
                     Planları karşılaştır
                   </Link>
                 </div>
