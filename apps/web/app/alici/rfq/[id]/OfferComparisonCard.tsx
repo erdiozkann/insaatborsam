@@ -6,6 +6,11 @@
 // Server component — interaktivite yok (disabled butonlar client JS gerektirmez).
 
 import { offerStatusLabel, offerStatusBadgeClass } from '@/lib/rfq/offer-status'
+import {
+  shortlistOfferAction,
+  rejectOfferAction,
+  acceptOfferPendingAction,
+} from './actions'
 
 export type OfferCardData = {
   id: string
@@ -36,7 +41,18 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-export function OfferComparisonCard({ offer }: { offer: OfferCardData }) {
+export function OfferComparisonCard({
+  offer,
+  rfqId,
+}: {
+  offer: OfferCardData
+  rfqId: string
+}) {
+  // Seçilmiş teklif: aksiyon yok, "sipariş Sprint 7" notu. accepted = legacy uyum.
+  const isSelected = offer.status === 'accepted_pending_order' || offer.status === 'accepted'
+  // Pasif teklif (satıcı çekti / süresi doldu): alıcı işlem yapamaz.
+  const isInactive = offer.status === 'withdrawn' || offer.status === 'expired'
+
   return (
     <div className="border border-border bg-surface-container-lowest">
       {/* Başlık: satıcı + durum */}
@@ -104,33 +120,50 @@ export function OfferComparisonCard({ offer }: { offer: OfferCardData }) {
         </div>
       )}
 
-      {/* Aksiyonlar — Sprint 6.1'de açılacak (şimdilik pasif) */}
-      <div className="px-5 py-4 border-t border-border flex items-center gap-2 flex-wrap">
-        <button
-          type="button"
-          disabled
-          title="Sprint 6.1'de açılacak"
-          className="border border-border text-ink-muted font-bold text-xs uppercase tracking-wider px-3 py-1.5 opacity-50 cursor-not-allowed"
-        >
-          Kısa Liste
-        </button>
-        <button
-          type="button"
-          disabled
-          title="Sprint 6.1'de açılacak"
-          className="border border-border text-ink-muted font-bold text-xs uppercase tracking-wider px-3 py-1.5 opacity-50 cursor-not-allowed"
-        >
-          Reddet
-        </button>
-        <button
-          type="button"
-          disabled
-          title="Sprint 6.1'de açılacak"
-          className="border border-border text-ink-muted font-bold text-xs uppercase tracking-wider px-3 py-1.5 opacity-50 cursor-not-allowed"
-        >
-          Seç
-        </button>
-      </div>
+      {/* Aksiyonlar — alıcı lifecycle. Güvenlik server tarafında (set_rfq_offer_status RPC). */}
+      {isSelected ? (
+        <div className="px-5 py-4 border-t border-border bg-surface-container">
+          <p className="text-xs text-ink-secondary leading-5">
+            Bu teklifi seçtiniz.{' '}
+            <strong className="text-ink">Sipariş oluşturma Sprint 7&apos;de açılacak.</strong>
+          </p>
+        </div>
+      ) : isInactive ? (
+        <div className="px-5 py-4 border-t border-border">
+          <p className="text-xs text-ink-muted leading-5">Bu teklif için işlem yapılamaz.</p>
+        </div>
+      ) : (
+        <div className="px-5 py-4 border-t border-border flex items-center gap-2 flex-wrap">
+          {offer.status !== 'shortlisted' && (
+            <form action={shortlistOfferAction.bind(null, offer.id, rfqId)}>
+              <button
+                type="submit"
+                className="border border-border text-navy font-bold text-xs uppercase tracking-wider px-3 py-1.5 hover:bg-surface-container transition-colors"
+              >
+                Kısa Liste
+              </button>
+            </form>
+          )}
+          {offer.status !== 'rejected' && (
+            <form action={rejectOfferAction.bind(null, offer.id, rfqId)}>
+              <button
+                type="submit"
+                className="border border-state-error text-state-error font-bold text-xs uppercase tracking-wider px-3 py-1.5 hover:bg-surface-container transition-colors"
+              >
+                Reddet
+              </button>
+            </form>
+          )}
+          <form action={acceptOfferPendingAction.bind(null, offer.id, rfqId)}>
+            <button
+              type="submit"
+              className="bg-brand text-navy font-bold text-xs uppercase tracking-wider px-3 py-1.5 hover:opacity-90 transition-opacity"
+            >
+              Seç
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   )
 }
