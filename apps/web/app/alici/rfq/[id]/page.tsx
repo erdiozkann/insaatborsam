@@ -237,14 +237,13 @@ export default async function RfqDetailPage({ params }: Props) {
                   <div className="p-5 flex flex-col gap-4">
                     <div className="border border-border bg-surface-container px-4 py-3">
                       <p className="text-xs text-ink-secondary leading-5">
-                        Teklifleri karşılaştırabilirsiniz.{' '}
-                        <strong className="text-ink">Kısa liste, reddet ve seç</strong>{' '}
-                        aksiyonları Sprint 6.1&apos;de açılacak; sipariş oluşturma ise
-                        sonraki aşamada.
+                        Teklifleri karşılaştırıp kısa listeye alabilir, reddedebilir veya
+                        seçebilirsiniz.{' '}
+                        <strong className="text-ink">Sipariş oluşturma Sprint 7&apos;de açılacak.</strong>
                       </p>
                     </div>
                     {offerCards.map((offer) => (
-                      <OfferComparisonCard key={offer.id} offer={offer} />
+                      <OfferComparisonCard key={offer.id} offer={offer} rfqId={rfq.id} />
                     ))}
                   </div>
                 )}

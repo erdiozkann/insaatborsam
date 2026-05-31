@@ -1,17 +1,19 @@
 // apps/web/src/lib/rfq/offer-status.ts
 // rfq_offers.status için merkezi label/açıklama/rozet eşlemesi.
 //
-// DB CHECK (migration 20260519000028): status IN
-//   ('pending', 'accepted', 'rejected', 'expired', 'withdrawn')
-// Sprint 6 SALT-OKUMA: bu değerler olduğu gibi label'lanır. Genişletilmiş lifecycle
-// ('shortlisted', 'accepted_pending_order') ve buyer status aksiyonları Sprint 6.1'de
-// (migration + RPC) gelecek — burada YAZILMAZ, sadece okunur.
+// DB CHECK (migration 20260519000028 + 20260531000001): status IN
+//   ('pending', 'shortlisted', 'accepted', 'accepted_pending_order',
+//    'rejected', 'expired', 'withdrawn')
+// Sprint 6.1: shortlisted + accepted_pending_order eklendi (alıcı lifecycle aksiyonları
+// set_rfq_offer_status RPC ile yazılır). 'accepted' legacy/uyum için tutulur.
 //
 // Bilinmeyen/uyumsuz status → güvenli fallback ("Bilinmeyen Durum").
 
 export const OFFER_STATUS_VALUES = [
   'pending',
+  'shortlisted',
   'accepted',
+  'accepted_pending_order',
   'rejected',
   'expired',
   'withdrawn',
@@ -38,9 +40,21 @@ const OFFER_STATUS_META: Record<OfferStatus, OfferStatusMeta> = {
     sellerDescription: 'Teklifiniz alıcı tarafından değerlendiriliyor.',
     tone: 'neutral',
   },
+  shortlisted: {
+    label: 'Kısa Listede',
+    sellerLabel: 'Teklifiniz kısa listeye alındı',
+    sellerDescription: 'Alıcı teklifinizi kısa listeye aldı; değerlendirme sürüyor.',
+    tone: 'neutral',
+  },
   accepted: {
     label: 'Seçildi',
     sellerLabel: 'Teklifiniz seçildi',
+    sellerDescription: 'Alıcı teklifinizi seçti. Sipariş aşaması yakında açılacak.',
+    tone: 'success',
+  },
+  accepted_pending_order: {
+    label: 'Seçildi',
+    sellerLabel: 'Teklifiniz seçildi, sipariş aşaması bekleniyor',
     sellerDescription: 'Alıcı teklifinizi seçti. Sipariş aşaması yakında açılacak.',
     tone: 'success',
   },
@@ -106,5 +120,10 @@ export function offerStatusBadgeClass(status: string): string {
  * edilmeyeceği. Reddedilen/çekilen/süresi dolan teklifler karşılaştırma dışı.
  */
 export function isComparableOfferStatus(status: string): boolean {
-  return status === 'pending' || status === 'accepted'
+  return (
+    status === 'pending' ||
+    status === 'shortlisted' ||
+    status === 'accepted' ||
+    status === 'accepted_pending_order'
+  )
 }

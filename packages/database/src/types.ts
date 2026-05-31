@@ -1799,6 +1799,10 @@ export type Database = {
       is_active_row: { Args: { p_deleted_at: string }; Returns: boolean }
       is_active_staff: { Args: never; Returns: boolean }
       show_limit: { Args: never; Returns: number }
+      set_rfq_offer_status: {
+        Args: { p_next_status: string; p_offer_id: string }
+        Returns: undefined
+      }
       show_trgm: { Args: { "": string }; Returns: string[] }
       update_buyer_order_note: {
         Args: { p_note: string; p_order_id: string }
