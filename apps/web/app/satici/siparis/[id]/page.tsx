@@ -7,9 +7,11 @@ import { SellerPendingScreen } from '@/components/seller/SellerPendingScreen'
 import {
   orderStatusLabel,
   orderStatusBadgeClass,
+  orderStatusSellerDescription,
   paymentStatusLabel,
   paymentStatusBadgeClass,
 } from '@/lib/order/order-status'
+import { OrderTimeline, type OrderTimelineEntry } from '@/components/order/OrderTimeline'
 
 export const metadata: Metadata = {
   title: 'Sipariş Detayı | İnşaat Borsam',
@@ -71,6 +73,22 @@ export default async function SaticiSiparisDetayPage({ params }: Props) {
     .eq('order_id', order.id)
     .order('display_order')
 
+  // Durum geçmişi (RLS: order_status_history_select_seller — yalnızca kendi siparişi).
+  // Geçmiş kaydı alıcı PII içermez (status_to/actor_type/note/created_at).
+  const { data: history } = await supabase
+    .from('order_status_history')
+    .select('id, status_to, actor_type, note, created_at')
+    .eq('order_id', order.id)
+    .order('created_at', { ascending: true })
+
+  const timelineEntries: OrderTimelineEntry[] = (history ?? []).map((h) => ({
+    id: h.id,
+    statusTo: h.status_to,
+    actorType: h.actor_type,
+    note: h.note,
+    createdAt: h.created_at,
+  }))
+
   return (
     <>
       <section className="bg-surface border-b border-border py-10">
@@ -99,6 +117,12 @@ export default async function SaticiSiparisDetayPage({ params }: Props) {
               >
                 ← Tekliflerim
               </Link>
+              <Link
+                href="/satici/panel"
+                className="border border-border-strong text-navy font-bold text-xs uppercase tracking-wider px-4 py-2 hover:bg-surface-container transition-colors"
+              >
+                Panel
+              </Link>
             </div>
           </div>
         </div>
@@ -109,12 +133,14 @@ export default async function SaticiSiparisDetayPage({ params }: Props) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 flex flex-col gap-6">
 
-              {/* Bilgi notu */}
-              <div className="border border-border bg-surface-container px-5 py-4">
+              {/* Bilgi notu — Sprint 8: ödeme YOK, sipariş ön hazırlık aşamasında */}
+              <div className="border border-border bg-surface-container px-5 py-4 flex flex-col gap-2">
                 <p className="text-sm text-ink leading-6">
-                  Alıcı bu teklifinizden sipariş oluşturdu.{' '}
-                  <strong className="text-ink">Ödeme Sprint 8&apos;de açılacak.</strong> Henüz
-                  bir tahsilat yapılmadı.
+                  Alıcı bu teklifinizden sipariş oluşturdu. {orderStatusSellerDescription(order.status)}
+                </p>
+                <p className="text-xs text-ink-secondary leading-5">
+                  <strong className="text-ink">Sipariş ön hazırlık aşamasında; ödeme bekleniyor.</strong>{' '}
+                  Ödeme ve teslimat adımı Sprint 9&apos;da açılacak. Henüz bir tahsilat yapılmadı.
                 </p>
               </div>
 
@@ -144,6 +170,19 @@ export default async function SaticiSiparisDetayPage({ params }: Props) {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* Teslimat Hazırlığı — satıcıya alıcı adresi/PII GÖSTERİLMEZ */}
+              <div className="border border-border bg-surface-container-lowest">
+                <div className="p-5 border-b border-border">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-navy">Teslimat Hazırlığı</h2>
+                </div>
+                <div className="px-5 py-4">
+                  <p className="text-sm text-ink-secondary leading-6">
+                    Teslimat bilgileri ödeme adımında kesinleşecek.{' '}
+                    <strong className="text-ink">Adres ve kargo bilgileri Sprint 9&apos;da paylaşılacak.</strong>
+                  </p>
                 </div>
               </div>
             </div>
@@ -191,6 +230,20 @@ export default async function SaticiSiparisDetayPage({ params }: Props) {
                       {paymentStatusLabel(order.payment_status)}
                     </span>
                   </div>
+                </div>
+              </div>
+
+              {/* Sipariş Geçmişi (timeline) — alıcı PII içermez */}
+              <div className="border border-border bg-surface-container-lowest">
+                <div className="p-5 border-b border-border">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-navy">Sipariş Geçmişi</h3>
+                </div>
+                <div className="p-5">
+                  <OrderTimeline
+                    entries={timelineEntries}
+                    fallbackStatus={order.status}
+                    fallbackDate={order.created_at}
+                  />
                 </div>
                 <div className="p-5 border-t border-border">
                   <Link href="/satici/teklifler" className="text-xs text-navy underline font-medium">
