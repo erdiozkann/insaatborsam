@@ -51,8 +51,11 @@ export function OfferComparisonCard({
   offer: OfferCardData
   rfqId: string
 }) {
-  // Seçilmiş teklif: aksiyon yok, "sipariş Sprint 7" notu. accepted = legacy uyum.
+  // Seçilmiş teklif: accepted_pending_order = yeni akış; accepted = legacy uyum.
   const isSelected = offer.status === 'accepted_pending_order' || offer.status === 'accepted'
+  // Sipariş oluşturma YALNIZCA accepted_pending_order'da (RPC de bu durumu zorunlu kılar).
+  // Legacy 'accepted' tekliflerde buton gösterilmez — aksi halde no-op buton oluşurdu.
+  const canCreateOrder = offer.status === 'accepted_pending_order'
   // Pasif teklif (satıcı çekti / süresi doldu): alıcı işlem yapamaz.
   const isInactive = offer.status === 'withdrawn' || offer.status === 'expired'
 
@@ -138,7 +141,7 @@ export function OfferComparisonCard({
                 Siparişi Görüntüle
               </Link>
             </>
-          ) : (
+          ) : canCreateOrder ? (
             <>
               <p className="text-xs text-ink-secondary leading-5">
                 Bu teklifi seçtiniz. Bu tekliften sipariş oluşturabilirsiniz.{' '}
@@ -153,6 +156,8 @@ export function OfferComparisonCard({
                 </button>
               </form>
             </>
+          ) : (
+            <p className="text-xs text-ink-secondary leading-5">Bu teklifi seçtiniz.</p>
           )}
         </div>
       ) : isInactive ? (
