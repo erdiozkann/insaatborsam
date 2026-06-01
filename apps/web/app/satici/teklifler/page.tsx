@@ -40,7 +40,7 @@ export default async function SaticiTekliflerPage() {
   // RFQ başlığı embedded select ile alınır (rfqs RLS davetli satıcıya erişim verir).
   const { data: offers } = await supabase
     .from('rfq_offers')
-    .select('id, rfq_id, unit_price_cents, total_price_cents, delivery_time_days, status, created_at, rfqs(title)')
+    .select('id, rfq_id, unit_price_cents, total_price_cents, delivery_time_days, status, created_at, resulting_order_id, rfqs(title)')
     .eq('seller_id', sellerProfile.id)
     .order('created_at', { ascending: false })
     .limit(50)
@@ -94,40 +94,49 @@ export default async function SaticiTekliflerPage() {
           ) : (
             <div className="border border-border bg-surface-container-lowest divide-y divide-border">
               {offers.map((offer) => (
-                <Link
-                  key={offer.id}
-                  href={`/satici/rfq/${offer.rfq_id}`}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-4 hover:bg-surface-container transition-colors group"
-                >
-                  <div className="flex flex-col gap-1 min-w-0">
-                    <span className="text-sm font-bold text-ink group-hover:text-navy transition-colors truncate">
-                      {offer.rfqs?.title ?? 'Teklif Talebi'}
-                    </span>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className="text-xs text-ink-muted tabular-nums">
-                        Birim: {formatCents(offer.unit_price_cents)}
+                <div key={offer.id}>
+                  <Link
+                    href={`/satici/rfq/${offer.rfq_id}`}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-4 hover:bg-surface-container transition-colors group"
+                  >
+                    <div className="flex flex-col gap-1 min-w-0">
+                      <span className="text-sm font-bold text-ink group-hover:text-navy transition-colors truncate">
+                        {offer.rfqs?.title ?? 'Teklif Talebi'}
                       </span>
-                      <span className="text-xs text-ink-muted tabular-nums">
-                        Teslimat: {offer.delivery_time_days} gün
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className="text-xs text-ink-muted tabular-nums">
+                          Birim: {formatCents(offer.unit_price_cents)}
+                        </span>
+                        <span className="text-xs text-ink-muted tabular-nums">
+                          Teslimat: {offer.delivery_time_days} gün
+                        </span>
+                        <span className="text-xs text-ink-muted">{formatDate(offer.created_at)}</span>
+                      </div>
+                      <span className="text-xs text-ink-secondary leading-5">
+                        {offerStatusSellerDescription(offer.status)}
                       </span>
-                      <span className="text-xs text-ink-muted">{formatDate(offer.created_at)}</span>
                     </div>
-                    <span className="text-xs text-ink-secondary leading-5">
-                      {offerStatusSellerDescription(offer.status)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <span className="text-sm font-bold text-ink tabular-nums">
-                      {formatCents(offer.total_price_cents)}
-                    </span>
-                    <span
-                      className={`text-xs font-bold uppercase tracking-wider px-2 py-1 ${offerStatusBadgeClass(offer.status)}`}
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span className="text-sm font-bold text-ink tabular-nums">
+                        {formatCents(offer.total_price_cents)}
+                      </span>
+                      <span
+                        className={`text-xs font-bold uppercase tracking-wider px-2 py-1 ${offerStatusBadgeClass(offer.status)}`}
+                      >
+                        {offerStatusLabel(offer.status)}
+                      </span>
+                      <span className="text-ink-muted text-sm">→</span>
+                    </div>
+                  </Link>
+                  {offer.resulting_order_id && (
+                    <Link
+                      href={`/satici/siparis/${offer.resulting_order_id}`}
+                      className="flex items-center gap-2 px-5 py-2 border-t border-border bg-surface-container text-xs font-bold uppercase tracking-wider text-navy hover:opacity-80 transition-opacity"
                     >
-                      {offerStatusLabel(offer.status)}
-                    </span>
-                    <span className="text-ink-muted text-sm">→</span>
-                  </div>
-                </Link>
+                      Siparişi Görüntüle →
+                    </Link>
+                  )}
+                </div>
               ))}
             </div>
           )}

@@ -5,11 +5,13 @@
 //
 // Server component — interaktivite yok (disabled butonlar client JS gerektirmez).
 
+import Link from 'next/link'
 import { offerStatusLabel, offerStatusBadgeClass } from '@/lib/rfq/offer-status'
 import {
   shortlistOfferAction,
   rejectOfferAction,
   acceptOfferPendingAction,
+  createOrderFromOfferAction,
 } from './actions'
 
 export type OfferCardData = {
@@ -24,6 +26,7 @@ export type OfferCardData = {
   notes: string | null
   status: string
   createdAt: string
+  resultingOrderId: string | null
   isCheapest: boolean
   isFastest: boolean
 }
@@ -120,13 +123,37 @@ export function OfferComparisonCard({
         </div>
       )}
 
-      {/* Aksiyonlar — alıcı lifecycle. Güvenlik server tarafında (set_rfq_offer_status RPC). */}
+      {/* Aksiyonlar — alıcı lifecycle. Güvenlik server tarafında (RPC, SECURITY DEFINER). */}
       {isSelected ? (
-        <div className="px-5 py-4 border-t border-border bg-surface-container">
-          <p className="text-xs text-ink-secondary leading-5">
-            Bu teklifi seçtiniz.{' '}
-            <strong className="text-ink">Sipariş oluşturma Sprint 7&apos;de açılacak.</strong>
-          </p>
+        <div className="px-5 py-4 border-t border-border bg-surface-container flex flex-col gap-3">
+          {offer.resultingOrderId ? (
+            <>
+              <p className="text-xs text-ink-secondary leading-5">
+                Bu tekliften sipariş oluşturuldu.
+              </p>
+              <Link
+                href={`/alici/siparis/${offer.resultingOrderId}`}
+                className="inline-block self-start bg-navy text-white font-bold text-xs uppercase tracking-wider px-3 py-1.5 hover:opacity-90 transition-opacity"
+              >
+                Siparişi Görüntüle
+              </Link>
+            </>
+          ) : (
+            <>
+              <p className="text-xs text-ink-secondary leading-5">
+                Bu teklifi seçtiniz. Bu tekliften sipariş oluşturabilirsiniz.{' '}
+                <strong className="text-ink">Sipariş oluşturmak ödeme değildir.</strong>
+              </p>
+              <form action={createOrderFromOfferAction.bind(null, offer.id, rfqId)}>
+                <button
+                  type="submit"
+                  className="bg-brand text-navy font-bold text-xs uppercase tracking-wider px-3 py-1.5 hover:opacity-90 transition-opacity"
+                >
+                  Sipariş Oluştur
+                </button>
+              </form>
+            </>
+          )}
         </div>
       ) : isInactive ? (
         <div className="px-5 py-4 border-t border-border">
