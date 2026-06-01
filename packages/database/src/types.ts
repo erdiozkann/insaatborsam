@@ -1795,6 +1795,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_order_from_offer: {
+        Args: { p_offer_id: string }
+        Returns: string
+      }
       has_staff_role: { Args: { p_role_names: string[] }; Returns: boolean }
       is_active_row: { Args: { p_deleted_at: string }; Returns: boolean }
       is_active_staff: { Args: never; Returns: boolean }

@@ -69,7 +69,7 @@ export default async function RfqDetailPage({ params }: Props) {
   const { data: offersRaw } = await supabase
     .from('rfq_offers')
     .select(
-      'id, unit_price_cents, total_price_cents, delivery_time_days, notes, status, created_at, seller_profiles(store_name, company_name, primary_city, rating_avg, rating_count)',
+      'id, unit_price_cents, total_price_cents, delivery_time_days, notes, status, created_at, resulting_order_id, seller_profiles(store_name, company_name, primary_city, rating_avg, rating_count)',
     )
     .eq('rfq_id', rfq.id)
     .order('total_price_cents', { ascending: true })
@@ -94,6 +94,7 @@ export default async function RfqDetailPage({ params }: Props) {
       notes: o.notes,
       status: o.status,
       createdAt: o.created_at,
+      resultingOrderId: o.resulting_order_id ?? null,
       isCheapest: comparableOffer && minTotal !== null && o.total_price_cents === minTotal,
       isFastest: comparableOffer && minDays !== null && o.delivery_time_days === minDays,
     }
@@ -238,8 +239,8 @@ export default async function RfqDetailPage({ params }: Props) {
                     <div className="border border-border bg-surface-container px-4 py-3">
                       <p className="text-xs text-ink-secondary leading-5">
                         Teklifleri karşılaştırıp kısa listeye alabilir, reddedebilir veya
-                        seçebilirsiniz.{' '}
-                        <strong className="text-ink">Sipariş oluşturma Sprint 7&apos;de açılacak.</strong>
+                        seçebilirsiniz. Seçtiğiniz tekliften sipariş oluşturabilirsiniz.{' '}
+                        <strong className="text-ink">Sipariş oluşturmak ödeme değildir; ödeme Sprint 8&apos;de açılacak.</strong>
                       </p>
                     </div>
                     {offerCards.map((offer) => (
