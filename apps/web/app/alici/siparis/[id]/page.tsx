@@ -6,9 +6,11 @@ import { createClient } from '@/lib/supabase/server'
 import {
   orderStatusLabel,
   orderStatusBadgeClass,
+  orderStatusBuyerDescription,
   paymentStatusLabel,
   paymentStatusBadgeClass,
 } from '@/lib/order/order-status'
+import { OrderTimeline, type OrderTimelineEntry } from '@/components/order/OrderTimeline'
 
 export const metadata: Metadata = {
   title: 'Sipariş Detayı | İnşaat Borsam',
@@ -50,7 +52,7 @@ export default async function AliciSiparisDetayPage({ params }: Props) {
   const { data: order } = await supabase
     .from('orders')
     .select(
-      'id, order_number, status, payment_status, currency, subtotal_cents, shipping_cost_cents, tax_amount_cents, total_amount_cents, created_at, source_rfq_id, seller_profiles(store_name, company_name, primary_city)',
+      'id, order_number, status, payment_status, currency, subtotal_cents, shipping_cost_cents, tax_amount_cents, total_amount_cents, created_at, source_rfq_id, delivery_address_id, seller_profiles(store_name, company_name, primary_city)',
     )
     .eq('id', id)
     .eq('buyer_id', buyerProfileId)
@@ -64,8 +66,43 @@ export default async function AliciSiparisDetayPage({ params }: Props) {
     .eq('order_id', order.id)
     .order('display_order')
 
+  // Durum geçmişi (RLS: order_status_history_select_buyer — yalnızca kendi siparişi).
+  const { data: history } = await supabase
+    .from('order_status_history')
+    .select('id, status_to, actor_type, note, created_at')
+    .eq('order_id', order.id)
+    .order('created_at', { ascending: true })
+
+  // Teslimat adresi YALNIZCA bağlıysa ve alıcının KENDİ adresiyse okunur
+  // (addresses_select_own: user_id = auth.uid()). NULL ise empty state gösterilir.
+  // Bu sprintte adres SEÇME/KAYDETME yok — sadece okuma + hazırlık paneli.
+  let address: {
+    label: string | null
+    recipient_name: string
+    city: string
+    district: string
+    neighborhood: string | null
+    street_address: string
+  } | null = null
+  if (order.delivery_address_id) {
+    const { data } = await supabase
+      .from('addresses')
+      .select('label, recipient_name, city, district, neighborhood, street_address')
+      .eq('id', order.delivery_address_id)
+      .maybeSingle()
+    address = data ?? null
+  }
+
   const seller = order.seller_profiles
   const sellerName = seller?.store_name ?? seller?.company_name ?? 'Satıcı'
+
+  const timelineEntries: OrderTimelineEntry[] = (history ?? []).map((h) => ({
+    id: h.id,
+    statusTo: h.status_to,
+    actorType: h.actor_type,
+    note: h.note,
+    createdAt: h.created_at,
+  }))
 
   return (
     <>
@@ -97,6 +134,12 @@ export default async function AliciSiparisDetayPage({ params }: Props) {
                   ← Teklif Talebi
                 </Link>
               )}
+              <Link
+                href="/alici/rfq"
+                className="border border-border-strong text-navy font-bold text-xs uppercase tracking-wider px-4 py-2 hover:bg-surface-container transition-colors"
+              >
+                Taleplerim
+              </Link>
             </div>
           </div>
         </div>
@@ -107,12 +150,14 @@ export default async function AliciSiparisDetayPage({ params }: Props) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 flex flex-col gap-6">
 
-              {/* Ödeme bilgi notu */}
-              <div className="border border-border bg-surface-container px-5 py-4">
+              {/* Ödeme bilgi notu — Sprint 8: ödeme YOK */}
+              <div className="border border-border bg-surface-container px-5 py-4 flex flex-col gap-2">
                 <p className="text-sm text-ink leading-6">
-                  Siparişiniz oluşturuldu.{' '}
-                  <strong className="text-ink">Ödeme Sprint 8&apos;de açılacak.</strong> Bu
-                  aşamada herhangi bir ödeme alınmaz.
+                  Siparişiniz oluşturuldu. {orderStatusBuyerDescription(order.status)}
+                </p>
+                <p className="text-xs text-ink-secondary leading-5">
+                  <strong className="text-ink">Bu sipariş henüz ödeme alınmış bir sipariş değildir.</strong>{' '}
+                  Ödeme ve teslimat adımı Sprint 9&apos;da açılacak; bu aşamada herhangi bir tahsilat yapılmaz.
                 </p>
               </div>
 
@@ -145,6 +190,35 @@ export default async function AliciSiparisDetayPage({ params }: Props) {
                 </div>
               </div>
 
+              {/* Teslimat Hazırlığı — Sprint 8: SADECE okuma/hazırlık, adres SEÇME yok */}
+              <div className="border border-border bg-surface-container-lowest">
+                <div className="p-5 border-b border-border">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-navy">Teslimat Hazırlığı</h2>
+                </div>
+                {address ? (
+                  <div className="px-5 py-4 flex flex-col gap-1">
+                    {address.label && (
+                      <span className="text-xs text-ink-muted uppercase tracking-wider">{address.label}</span>
+                    )}
+                    <span className="text-sm font-bold text-ink">{address.recipient_name}</span>
+                    <span className="text-sm text-ink leading-5">{address.street_address}</span>
+                    <span className="text-xs text-ink-muted">
+                      {[address.neighborhood, address.district, address.city].filter(Boolean).join(', ')}
+                    </span>
+                    <span className="text-xs text-ink-secondary leading-5 mt-2">
+                      Teslimat tercihi ve kargo seçimi Sprint 9&apos;da açılacak.
+                    </span>
+                  </div>
+                ) : (
+                  <div className="px-5 py-4">
+                    <p className="text-sm text-ink-secondary leading-6">
+                      Teslimat bilgisi henüz eklenmedi.{' '}
+                      <strong className="text-ink">Adres ve teslimat adımı Sprint 9&apos;da açılacak.</strong>
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* Satıcı */}
               <div className="border border-border bg-surface-container-lowest">
                 <div className="p-5 border-b border-border">
@@ -159,8 +233,9 @@ export default async function AliciSiparisDetayPage({ params }: Props) {
               </div>
             </div>
 
-            {/* Sağ panel — tutar özeti */}
+            {/* Sağ panel */}
             <aside className="flex flex-col gap-4">
+              {/* Tutar Özeti */}
               <div className="border border-border bg-surface-container-lowest">
                 <div className="p-5 border-b border-border">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-navy">Tutar Özeti</h3>
@@ -185,6 +260,7 @@ export default async function AliciSiparisDetayPage({ params }: Props) {
                 </div>
               </div>
 
+              {/* Durum + Ödeme */}
               <div className="border border-border bg-surface-container-lowest">
                 <div className="p-5 border-b border-border">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-navy">Durum</h3>
@@ -202,6 +278,20 @@ export default async function AliciSiparisDetayPage({ params }: Props) {
                       {paymentStatusLabel(order.payment_status)}
                     </span>
                   </div>
+                </div>
+              </div>
+
+              {/* Sipariş Geçmişi (timeline) */}
+              <div className="border border-border bg-surface-container-lowest">
+                <div className="p-5 border-b border-border">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-navy">Sipariş Geçmişi</h3>
+                </div>
+                <div className="p-5">
+                  <OrderTimeline
+                    entries={timelineEntries}
+                    fallbackStatus={order.status}
+                    fallbackDate={order.created_at}
+                  />
                 </div>
                 <div className="p-5 border-t border-border">
                   <Link href="/alici/rfq" className="text-xs text-navy underline font-medium">
