@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Logo } from "@insaatborsam/ui/components/Logo";
 
@@ -17,6 +20,11 @@ const legalLinks = [
 ];
 
 export function Footer() {
+  const pathname = usePathname();
+
+  // Admin paneli kendi chrome'unu kullanır — public Footer gösterilmez.
+  if (pathname?.startsWith("/admin")) return null;
+
   return (
     <footer className="border-t border-border bg-surface-container-lowest">
       <div className="w-full max-w-container mx-auto px-5 md:px-12 py-12">

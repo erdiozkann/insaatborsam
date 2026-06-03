@@ -184,3 +184,48 @@ INSERT INTO public.rfq_offers (
   'pending'
 )
 ON CONFLICT (rfq_id, seller_id) DO NOTHING;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 6. Staff (admin) kullanıcısı — Sprint 9 admin operasyon paneli testi için.
+--    Rol: owner (seed_roles 000066 → 00000000-…-000000000101).
+--    profiles handle_new_user trigger ile otomatik oluşur (role='staff', consent_kvkk).
+--    Giriş: admin@insaatborsam.test / Test1234!
+-- ─────────────────────────────────────────────────────────────────────────────
+INSERT INTO auth.users (
+  instance_id, id, aud, role, email, encrypted_password,
+  email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+  created_at, updated_at,
+  confirmation_token, email_change, email_change_token_new, recovery_token
+) VALUES (
+  '00000000-0000-0000-0000-000000000000',
+  '88888888-8888-8888-8888-888888888888',
+  'authenticated', 'authenticated',
+  'admin@insaatborsam.test',
+  crypt('Test1234!', gen_salt('bf')),
+  NOW(),
+  '{"provider":"email","providers":["email"]}',
+  '{"full_name":"İB Operasyon","role":"staff","consent_kvkk":"true","consent_marketing":"false","preferred_language":"tr"}',
+  NOW(), NOW(), '', '', '', ''
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO auth.identities (
+  id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at
+) VALUES (
+  '88888888-8888-8888-8888-888888888888',
+  '88888888-8888-8888-8888-888888888888',
+  '88888888-8888-8888-8888-888888888888',
+  '{"sub":"88888888-8888-8888-8888-888888888888","email":"admin@insaatborsam.test"}',
+  'email', NOW(), NOW(), NOW()
+)
+ON CONFLICT (provider_id, provider) DO NOTHING;
+
+-- staff_users: owner rolü (tam yetki). is_active = TRUE.
+INSERT INTO public.staff_users (id, user_id, role_id, is_active)
+VALUES (
+  '8a000000-0000-0000-0000-000000000001',
+  '88888888-8888-8888-8888-888888888888',
+  '00000000-0000-0000-0000-000000000101',
+  TRUE
+)
+ON CONFLICT (user_id) DO NOTHING;

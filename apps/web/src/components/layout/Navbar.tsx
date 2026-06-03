@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Logo } from "@insaatborsam/ui/components/Logo";
 
@@ -12,6 +13,10 @@ const navLinks = [
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Admin paneli kendi chrome'unu kullanır — public Navbar gösterilmez.
+  if (pathname?.startsWith("/admin")) return null;
 
   return (
     <header className="border-b border-border bg-surface-container-lowest sticky top-0 z-50">
