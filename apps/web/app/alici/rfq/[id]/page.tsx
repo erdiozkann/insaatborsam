@@ -240,7 +240,7 @@ export default async function RfqDetailPage({ params }: Props) {
                       <p className="text-xs text-ink-secondary leading-5">
                         Teklifleri karşılaştırıp kısa listeye alabilir, reddedebilir veya
                         seçebilirsiniz. Seçtiğiniz tekliften sipariş oluşturabilirsiniz.{' '}
-                        <strong className="text-ink">Sipariş oluşturmak ödeme değildir; ödeme Sprint 8&apos;de açılacak.</strong>
+                        <strong className="text-ink">Sipariş oluşturmak ödeme değildir; ödeme adımı henüz aktif değildir.</strong>
                       </p>
                     </div>
                     {offerCards.map((offer) => (

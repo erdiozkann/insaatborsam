@@ -20,7 +20,7 @@ export default async function AdminOrdersPage() {
 
       <div className="border border-border bg-surface-container px-5 py-3">
         <p className="text-xs text-ink-secondary leading-5">
-          Ödeme Sprint 9 sonrası açılacak. Tüm siparişler şu an <strong className="text-ink">ödeme öncesi (pending_payment)</strong> aşamasındadır.
+          Ödeme adımı pilot sürecinde henüz aktif değildir. Tüm siparişler şu an <strong className="text-ink">ödeme öncesi</strong> aşamasındadır.
         </p>
       </div>
 

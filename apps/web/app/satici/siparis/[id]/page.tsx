@@ -140,7 +140,7 @@ export default async function SaticiSiparisDetayPage({ params }: Props) {
                 </p>
                 <p className="text-xs text-ink-secondary leading-5">
                   <strong className="text-ink">Sipariş ön hazırlık aşamasında; ödeme bekleniyor.</strong>{' '}
-                  Ödeme ve teslimat adımı Sprint 9&apos;da açılacak. Henüz bir tahsilat yapılmadı.
+                  Ödeme ve teslimat adımı henüz aktif değildir. Henüz bir tahsilat yapılmadı.
                 </p>
               </div>
 
@@ -181,7 +181,7 @@ export default async function SaticiSiparisDetayPage({ params }: Props) {
                 <div className="px-5 py-4">
                   <p className="text-sm text-ink-secondary leading-6">
                     Teslimat bilgileri ödeme adımında kesinleşecek.{' '}
-                    <strong className="text-ink">Adres ve kargo bilgileri Sprint 9&apos;da paylaşılacak.</strong>
+                    <strong className="text-ink">Adres ve kargo bilgileri ilerleyen aşamada paylaşılacaktır.</strong>
                   </p>
                 </div>
               </div>

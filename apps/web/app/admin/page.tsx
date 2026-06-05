@@ -49,7 +49,7 @@ export default async function AdminDashboardPage() {
       <div className="border border-border bg-surface-container px-5 py-4">
         <h2 className="text-xs font-bold uppercase tracking-wider text-navy mb-2">Nakliye Hazırlığı</h2>
         <p className="text-sm text-ink-secondary leading-6">
-          Nakliye tercihi Sprint 10&apos;da RFQ/offer akışına eklenecek.{' '}
+          Nakliye tercihi yakında RFQ/teklif akışına eklenecektir.{' '}
           <strong className="text-ink">Pilot sırasında nakliye ihtiyacı admin tarafından manuel takip edilecek.</strong>
         </p>
       </div>
