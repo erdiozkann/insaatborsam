@@ -193,7 +193,7 @@ export default async function AdminRfqDetailPage({ params }: Props) {
           {/* Nakliye notu */}
           <div className="border border-border bg-surface-container px-5 py-4">
             <p className="text-xs text-ink-secondary leading-5">
-              Nakliye tercihi Sprint 10&apos;da eklenecek; pilot sırasında nakliye ihtiyacı manuel takip edilir.
+              Nakliye tercihi yakında eklenecektir; pilot sırasında nakliye ihtiyacı manuel takip edilir.
             </p>
           </div>
         </aside>

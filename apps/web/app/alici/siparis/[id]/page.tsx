@@ -157,7 +157,7 @@ export default async function AliciSiparisDetayPage({ params }: Props) {
                 </p>
                 <p className="text-xs text-ink-secondary leading-5">
                   <strong className="text-ink">Bu sipariş henüz ödeme alınmış bir sipariş değildir.</strong>{' '}
-                  Ödeme ve teslimat adımı Sprint 9&apos;da açılacak; bu aşamada herhangi bir tahsilat yapılmaz.
+                  Ödeme ve teslimat adımı henüz aktif değildir; bu aşamada herhangi bir tahsilat yapılmaz.
                 </p>
               </div>
 
@@ -206,14 +206,14 @@ export default async function AliciSiparisDetayPage({ params }: Props) {
                       {[address.neighborhood, address.district, address.city].filter(Boolean).join(', ')}
                     </span>
                     <span className="text-xs text-ink-secondary leading-5 mt-2">
-                      Teslimat tercihi ve kargo seçimi Sprint 9&apos;da açılacak.
+                      Teslimat tercihi ve kargo seçimi yakında eklenecektir.
                     </span>
                   </div>
                 ) : (
                   <div className="px-5 py-4">
                     <p className="text-sm text-ink-secondary leading-6">
                       Teslimat bilgisi henüz eklenmedi.{' '}
-                      <strong className="text-ink">Adres ve teslimat adımı Sprint 9&apos;da açılacak.</strong>
+                      <strong className="text-ink">Adres ve teslimat adımı ilerleyen aşamada açılacaktır.</strong>
                     </p>
                   </div>
                 )}

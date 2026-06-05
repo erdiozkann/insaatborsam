@@ -27,7 +27,7 @@ const ORDER_STATUS_META: Record<string, Meta> = {
   pending_payment: {
     label: 'Ödeme Bekleniyor',
     tone: 'neutral',
-    buyer: 'Ödeme hazırlığı bekleniyor. Ödeme ve teslimat adımı Sprint 9’da açılacak.',
+    buyer: 'Ödeme hazırlığı bekleniyor. Ödeme ve teslimat adımı henüz aktif değildir.',
     seller: 'Alıcı ödeme ve adres bilgilerini tamamlayacak. Henüz tahsilat yok.',
   },
   paid: {
