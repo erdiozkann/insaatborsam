@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   typedRoutes: true,
   transpilePackages: ["@insaatborsam/ui", "@insaatborsam/shared", "@insaatborsam/database", "@insaatborsam/ai"],
+  // Self-host (Coolify/Docker) için minimal standalone server üretir.
+  // Monorepo'da workspace bağımlılıklarının doğru izlenmesi için tracing root = repo kökü.
+  output: "standalone",
+  outputFileTracingRoot: monorepoRoot,
   turbopack: {
     root: monorepoRoot,
   },
