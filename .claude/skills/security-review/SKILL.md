@@ -58,6 +58,7 @@ Bu skill tetiklendiğinde, kodu yazmadan veya yazdıktan sonra aşağıdaki soru
 
 - [ ] Staff aksiyonu `admin_audit_logs`'a yazılıyor mu?
 - [ ] `is_active_staff()` veya `has_staff_role()` kullanılıyor mu? (recursive policy riski yok)
+- [ ] Staff write aksiyonu mu? → SECURITY DEFINER + `has_staff_role` gate + `admin_audit_logs` pattern'i izle (kanonik örnek: `supabase/migrations/20260601000002_admin_operations_rpc.sql` — `admin_set_seller_verification`, `admin_invite_seller_to_rfq`)
 - [ ] Staff INSERT/UPDATE/DELETE policy'si yanlışlıkla eklendi mi? → Default SELECT only
 
 ## 8. App Store Uyumu

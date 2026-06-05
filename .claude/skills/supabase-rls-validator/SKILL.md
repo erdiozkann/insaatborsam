@@ -223,7 +223,7 @@ Format: `YYYYMMDDHHMMSS_aciklama.sql`. **RLS migration'ları ayrı dosyada** olu
 Migration sonrası **mutlaka** type generate et:
 
 ```bash
-pnpm supabase gen types typescript --project-id <id> > packages/database/types.ts
+pnpm supabase gen types typescript --project-id <id> > packages/database/src/types.ts
 ```
 
 Bu olmadan client tip güvenliğinden yoksun kalır.

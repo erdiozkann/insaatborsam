@@ -1,15 +1,15 @@
 ---
 name: i18n-translation-check
-description: Yeni UI string'i, label, button text, error message eklenirken i18n disiplinini sağlar. Hardcoded string yasak, t() fonksiyonu zorunlu. Pluralization, number/date formatting Intl API üzerinden. "new string", "label", "yeni metin", "i18n", "translation", "localization" geçen istekler için.
+description: Faz 3 (İngilizce açılımı) için i18n referans planı. ŞU AN Faz 1'de t()/next-intl/packages/i18n YOK — UI hardcoded Türkçe (bkz. apps/web/next.config.ts). Faz 1'de düz Türkçe yazmak normaldir. i18n refactor'ü, çoklu dil planlaması veya formatCurrency/formatDate Intl yardımcıları gerektiğinde bak. "i18n", "translation", "localization", "çoklu dil", "ingilizce" geçen istekler için.
 ---
 
 # i18n / Lokalizasyon Disiplini
 
-Faz 1'de **sadece Türkçe** çıkıyoruz, ama altyapı **çoklu dil için hazır** olmalı. Hardcoded string = teknik borç.
+Faz 1'de **sadece Türkçe** ve **hardcoded** çıkıyoruz — şu an projede `t()`, `next-intl`/`i18next` veya `packages/i18n/` **YOK** (bkz. `apps/web/next.config.ts`: "şimdilik tek dil (tr), Faz 3'te i18next"). Bu skill **Faz 3 İngilizce açılımı için referans plandır**; Faz 1'de JSX'te düz Türkçe yazmak normaldir, hata değildir. Aşağıdaki `formatCurrency`/`formatDate` (Intl) yardımcıları ise bugün de geçerlidir.
 
-## TEMEL KURAL
+## TEMEL KURAL (Faz 3'te geçerli olacak)
 
-> Her görünen string `t('key')` üzerinden gelir. JSX'te direkt Türkçe yazma.
+> Faz 3'te her görünen string `t('key')` üzerinden gelir. Faz 1'de bu altyapı henüz kurulmadı — i18n refactor'ü ayrı bir görev olarak Faz 3'te yapılacak. Aşağıdaki yapı, o refactor'ün referans tasarımıdır.
 
 ```tsx
 // ❌ KÖTÜ
@@ -286,7 +286,9 @@ Screen reader için ekstra context:
 
 ## YAZIM ÖNCESİ CHECK
 
-UI string ekliyorsan:
+> Bu checklist yalnızca **Faz 3** i18n altyapısı kurulduktan sonra geçerlidir. Faz 1'de `t()` ve `pnpm i18n:types` mevcut değildir — UI string'i doğrudan Türkçe yaz, bu adımları atla.
+
+UI string ekliyorsan (Faz 3):
 - [ ] `t('key')` üzerinden mi geliyor (hardcoded değil)?
 - [ ] Key hiyerarşik mi (`feature.section.element`)?
 - [ ] tr/*.json dosyasına eklendi mi?

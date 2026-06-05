@@ -30,9 +30,9 @@ Bu skill **08-DESIGN.md** dosyasının özetidir. Detay için `docs/08-DESIGN.md
 'bg-brand'              // #F4B400 — CTA, kritik aksanlar
 'bg-brand-dark'         // #7A5900 — hover/pressed
 'bg-brand-light'        // #FFDEA3 — soft yellow container
-'text-navy' / 'bg-navy' // #1E293B — text, header, icon
+'text-navy' / 'bg-navy' // #2d3133 — text, header, icon
 'bg-surface'            // #F7F9FB — sayfa background
-'bg-surface-card'       // #FFFFFF — card background
+'bg-surface-container-lowest' // #FFFFFF — card background (kod genelinde fiili pattern)
 'bg-surface-container'  // #ECEEF0 — section container
 'text-ink'              // #191C1E — primary text
 'text-ink-secondary'    // #504533 — secondary text
@@ -88,7 +88,7 @@ gap-6=24px gap-8=32px gap-10=40px gap-12=48px gap-16=64px
   <input className="
     border-2 border-border focus:border-navy
     px-4 py-3 text-body-md text-ink
-    bg-surface-card
+    bg-surface-container-lowest
     placeholder:text-ink-muted
     focus:outline-none
   " />
@@ -97,7 +97,7 @@ gap-6=24px gap-8=32px gap-10=40px gap-12=48px gap-16=64px
 
 ### Card
 ```tsx
-<div className="bg-surface-card border border-border">
+<div className="bg-surface-container-lowest border border-border">
   <div className="bg-surface-container px-6 py-3 border-b border-border">
     <h3 className="text-label-bold uppercase tracking-wider text-navy">
       BAŞLIK
@@ -134,7 +134,7 @@ gap-6=24px gap-8=32px gap-10=40px gap-12=48px gap-16=64px
     </tr>
   </thead>
   <tbody>
-    <tr className="bg-surface-card border-b border-border">
+    <tr className="bg-surface-container-lowest border-b border-border">
       <td className="px-4 py-3">Karaköy Elektrik A.Ş.</td>
       <td className="px-4 py-3 text-right tabular-nums">₺12.450</td>
     </tr>
@@ -149,7 +149,7 @@ gap-6=24px gap-8=32px gap-10=40px gap-12=48px gap-16=64px
 ### Modal (hard shadow burada serbest)
 ```tsx
 <div className="fixed inset-0 bg-navy/40 flex items-center justify-center">
-  <div className="bg-surface-card border-2 border-navy shadow-hard-modal max-w-lg w-full">
+  <div className="bg-surface-container-lowest border-2 border-navy shadow-hard-modal max-w-lg w-full">
     <div className="px-6 py-4 border-b border-border">
       <h2 className="text-headline-md text-navy">Başlık</h2>
     </div>
