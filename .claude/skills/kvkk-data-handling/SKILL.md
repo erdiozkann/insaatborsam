@@ -222,8 +222,8 @@ logger.info('AI completion', {
 
 // Cache için (Supabase)
 await supabase.from('ai_cache').insert({
-  prompt_hash: hash(prompt),
-  response: result.text,
+  input_hash: hash(prompt),
+  response_text: result.text,
   // ❌ NOT: orijinal prompt
 })
 ```

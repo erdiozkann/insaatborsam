@@ -1795,6 +1795,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_invite_seller_to_rfq: {
+        Args: { p_rfq_id: string; p_seller_id: string }
+        Returns: string
+      }
+      admin_set_seller_verification: {
+        Args: { p_seller_id: string; p_verified: boolean }
+        Returns: undefined
+      }
       create_order_from_offer: {
         Args: { p_offer_id: string }
         Returns: string

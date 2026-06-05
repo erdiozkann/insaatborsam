@@ -7,54 +7,72 @@ description: RFQ (Teklif Talebi), teklif, sipariş, fatura, KDV, komisyon, sevki
 
 İnşaat sektörü kendine özgü kurallarla çalışır. Generic e-commerce kodu yetmez.
 
-## RFQ LİFECYCLE (State Machine)
+## RFQ + TEKLİF + SİPARİŞ LİFECYCLE (State Machines)
+
+> Üç ayrı tablo, üç ayrı status enum'ı var. Karıştırma. Gerçek CHECK
+> constraint değerleri (migration'lardan):
 
 ```
-draft
-  ↓ (alıcı yayınla)
-published
-  ↓ (satıcılara duyuru)
-bidding ──── (teklif toplama, default 7 gün)
-  ↓ (deadline veya manuel)
-awarded ──── (alıcı kazanan satıcıyı seçti)
-  ↓ (sipariş oluştur)
-ordered
-  ↓ (satıcı onayladı)
-preparing
-  ↓ (sevkiyat hazır)
-shipped
-  ↓ (kargo)
-delivered
-  ↓
-completed
+rfqs.status:           open → evaluating → closed
+                       open → expired (süre doldu)
+                       open/evaluating → cancelled
 
-[İptal yolları]
-draft → cancelled
-published → cancelled (alıcı)
-bidding → expired (kimse teklif vermedi)
-awarded → cancelled (alıcı vazgeçti, ceza yok)
-ordered → cancelled (her iki taraf onay)
+rfq_invitations.status: invited → seen → responded
+                        invited/seen → declined
+                        invited/seen → expired
+
+rfq_offers.status:     pending → shortlisted → accepted_pending_order
+                       pending/shortlisted → rejected
+                       pending → withdrawn (satıcı geri çeker)
+                       pending → expired
+                       (accepted = legacy, yeni akışta kullanılmaz)
+
+orders.status:         pending_payment → paid → confirmed → preparing
+                       → ready_to_ship → shipped → delivered
+                       herhangi bir nokta → cancelled
+                       paid sonrası → refunded
 ```
 
-### Valid transitions
+Alıcı `accepted_pending_order` teklifi `create_order_from_offer` RPC'si ile
+`pending_payment` siparişe dönüştürür (Sprint 6-7).
+
+### Valid transitions (gerçek enum değerleriyle)
 
 ```ts
 const RFQ_TRANSITIONS = {
-  draft: ['published', 'cancelled'],
-  published: ['bidding', 'cancelled'],
-  bidding: ['awarded', 'expired', 'cancelled'],
-  awarded: ['ordered', 'cancelled'],
-  ordered: ['preparing', 'cancelled'],
-  preparing: ['shipped'],
-  shipped: ['delivered'],
-  delivered: ['completed'],
-  completed: [], // terminal
-  cancelled: [], // terminal
-  expired: [], // terminal
+  open: ['evaluating', 'closed', 'expired', 'cancelled'],
+  evaluating: ['closed', 'cancelled'],
+  closed: [],     // terminal
+  expired: [],    // terminal
+  cancelled: [],  // terminal
 } as const
 
-function canTransition(from: RfqStatus, to: RfqStatus): boolean {
-  return RFQ_TRANSITIONS[from]?.includes(to) ?? false
+const OFFER_TRANSITIONS = {
+  pending: ['shortlisted', 'accepted_pending_order', 'rejected', 'withdrawn', 'expired'],
+  shortlisted: ['accepted_pending_order', 'rejected'],
+  accepted_pending_order: [], // sipariş RPC ile oluşur
+  accepted: [],   // legacy
+  rejected: [],
+  withdrawn: [],
+  expired: [],
+} as const
+
+const ORDER_TRANSITIONS = {
+  pending_payment: ['paid', 'cancelled'],
+  paid: ['confirmed', 'refunded', 'cancelled'],
+  confirmed: ['preparing', 'cancelled'],
+  preparing: ['ready_to_ship', 'cancelled'],
+  ready_to_ship: ['shipped', 'cancelled'],
+  shipped: ['delivered', 'cancelled'],
+  delivered: [],
+  cancelled: [],
+  refunded: [],
+} as const
+
+function canTransition<T extends Record<string, readonly string[]>>(
+  machine: T, from: keyof T, to: string,
+): boolean {
+  return machine[from]?.includes(to) ?? false
 }
 ```
 
@@ -66,8 +84,8 @@ const DEFAULT_OFFER_VALIDITY_DAYS = 7
 // RFQ oluşturulurken
 const rfq = {
   // ...
-  deadline: addDays(new Date(), DEFAULT_OFFER_VALIDITY_DAYS),
-  status: 'published',
+  expires_at: addDays(new Date(), DEFAULT_OFFER_VALIDITY_DAYS),
+  status: 'open',
 }
 
 // Cron her gün
@@ -75,12 +93,12 @@ async function expireOverdueRfqs() {
   await supabase
     .from('rfqs')
     .update({ status: 'expired' })
-    .lt('deadline', new Date().toISOString())
-    .eq('status', 'bidding')
+    .lt('expires_at', new Date().toISOString())
+    .eq('status', 'open')
 }
 ```
 
-Alıcı `deadline`'ı uzatabilir (max +14 gün).
+Alıcı `expires_at`'i uzatabilir (max +14 gün).
 
 ## ÇOKLU SATICIDAN TEKLİF BİRLEŞTİRME (Split Order)
 
@@ -130,7 +148,7 @@ async function awardRfq(rfqId: string, awards: AwardSelection[]) {
     await createOrder(order)
   }
   
-  await transitionRfq(rfqId, 'awarded')
+  await transitionRfq(rfqId, 'closed') // RFQ kapanır; teklif accepted_pending_order → sipariş
 }
 ```
 
