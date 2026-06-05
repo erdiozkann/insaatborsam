@@ -1,0 +1,50 @@
+name: CI
+
+# Kalite kapısı — deploy ETMEZ. Deploy'u Coolify (Hostinger VPS) main'e push'ta
+# GitHub App entegrasyonuyla kendisi yapar. Bu workflow yalnızca typecheck + build doğrular.
+# Not: `next lint` bu projede takılıyor (bkz. memory) — CI'da çalıştırılmaz.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Typecheck & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck (all packages)
+        run: pnpm typecheck
+
+      - name: Build web
+        run: pnpm --filter @insaatborsam/web build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          # CI build yalnızca derlemeyi doğrular — gerçek secret gerekmez.
+          # env.ts geçerli URL + >=20 karakter anon key bekler; placeholder yeterli.
+          NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "ci-placeholder-anon-key-0000000000"
+          NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
