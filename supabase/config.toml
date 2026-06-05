@@ -49,7 +49,10 @@ enable_signup = true
 enable_anonymous_sign_ins = false
 
 [auth.email]
-enable_signup = true
+# Kapalı pilot: e-posta ile public KAYIT yok — hesaplar admin/service_role ile
+# açılır (staff + davetli pilot). E-posta yalnızca SIGN-IN içindir. Self-signup
+# telefon (SMS OTP) üzerinden yapılır. Prod dashboard'da da bu kapalı olmalı.
+enable_signup = false
 double_confirm_changes = true
 enable_confirmations = false
 

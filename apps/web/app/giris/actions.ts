@@ -32,6 +32,13 @@ const otpSchema = z.object({
     .regex(/^\d{6}$/, 'SMS kodu yalnızca rakamlardan oluşmalı'),
 })
 
+const passwordSchema = z.object({
+  email: z.string().email('Geçerli bir e-posta adresi girin'),
+  password: z.string().min(1, 'Şifre gerekli'),
+})
+
+export type PasswordLoginState = { error?: string }
+
 export async function loginAction(
   prevState: LoginState,
   formData: FormData,
@@ -122,4 +129,50 @@ export async function loginAction(
   }
 
   return { phase: 'phone', error: 'Geçersiz istek.' }
+}
+
+/**
+ * E-posta + şifre ile giriş — yalnızca SIGN-IN (yeni kayıt yok).
+ * Hesaplar admin/service_role tarafından önceden oluşturulur (staff + kapalı
+ * pilot kullanıcıları). Public şifreli kayıt bilinçli olarak yoktur.
+ */
+export async function passwordLoginAction(
+  _prevState: PasswordLoginState,
+  formData: FormData,
+): Promise<PasswordLoginState> {
+  const parsed = passwordSchema.safeParse({
+    email: String(formData.get('email') ?? '').trim().toLowerCase(),
+    password: String(formData.get('password') ?? ''),
+  })
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Bilgileri kontrol edin.' }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  })
+
+  if (error) {
+    // Generic mesaj — hesap var/yok ayrımı sızdırılmaz
+    return { error: 'E-posta veya şifre hatalı.' }
+  }
+
+  // Explicit redirect param — yalnızca güvenli local path
+  const redirectParam = String(formData.get('redirect_to') ?? '').trim()
+  if (redirectParam && isLocalPath(redirectParam)) {
+    redirect(redirectParam)
+  }
+
+  const {
+    data: { user: authedUser },
+  } = await supabase.auth.getUser()
+
+  if (authedUser) {
+    redirect(await getPostLoginRedirect(authedUser.id))
+  }
+
+  redirect('/profil')
 }

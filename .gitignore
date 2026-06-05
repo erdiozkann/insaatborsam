@@ -57,3 +57,7 @@ coverage/
 # Supabase
 supabase/.branches/
 supabase/.temp/
+
+# Claude Code — local/personal artifacts (hooks + settings.json ARE committed)
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
