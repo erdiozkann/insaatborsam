@@ -5,7 +5,7 @@ import { GirisForm } from './GirisForm'
 
 export const metadata: Metadata = {
   title: 'Giriş Yap',
-  description: 'İnşaat Borsam hesabınıza SMS ile giriş yapın veya yeni hesap oluşturun.',
+  description: 'İnşaat Borsam hesabınıza SMS veya e-posta ile giriş yapın; yeni hesap oluşturun.',
   robots: { index: false },
 }
 
@@ -39,7 +39,8 @@ export default async function GirisPage({ searchParams }: Props) {
             Giriş Yap
           </h1>
           <p className="text-sm text-ink-secondary mt-2 leading-6">
-            Telefon numaranıza SMS doğrulama kodu göndereceğiz.
+            Telefon (SMS) ile giriş yapın veya yeni hesap oluşturun; ekip ve davetli
+            hesaplar e-posta ile giriş yapar.
           </p>
         </div>
 
