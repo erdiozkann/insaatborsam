@@ -20,14 +20,18 @@
 
 ## Launch Blocker'ları (pilot bunlar olmadan çalışmaz)
 
-| # | Blocker | Tip | Sahip |
+**KARAR (2026-06-05):** Pilot auth = **email/şifre** (SMS yok). Hesaplar admin/
+service_role ile açılır; kullanıcılar email/şifre ile girer. SMS provider pilot
+için gerekmez → Faz 2'ye ertelendi.
+
+| # | Blocker | Tip | Durum |
 |---|---|---|---|
-| B1 | **Login çalışmıyor** — UI sadece SMS-OTP; tek staff hesabı email/şifre seed; email/şifre giriş yolu yok → staff `/admin`'e giremiyor | KOD (+ops) | Claude → Erdi onay |
-| B2 | SMS provider Supabase'de yapılandırılmamış (`[auth.sms]` TODO, `enable_signup=false`) | OPS | Erdi |
-| B3 | İlk gerçek owner/staff hesabı prod'da yok (service_role runbook) | OPS | Erdi |
-| B4 | `/satici-ol` başvuruları kayboluyor (`console.log`, DB/email yok) | KOD | Claude |
-| B5 | Migration'lar prod'a push edilmemiş (`supabase db push`) | OPS | Erdi |
-| B6 | Mesafeli Satış sözleşmesinde tüzel kişi/adres eksik | HUKUK | Erdi (yalnız ödeme açılırsa zorunlu; pilot ödemesiz → ertelenebilir) |
+| B1 | Login çalışmıyor — email/şifre giriş yolu yoktu | KOD | ✅ **ÇÖZÜLDÜ** — email/şifre sign-in eklendi (`fb9df50`) |
+| B2 | SMS provider yapılandırılmamış | OPS | ⏸️ **Ertelendi** — pilot email/şifre kullanıyor, SMS gerekmez |
+| B3 | İlk gerçek owner/staff hesabı prod'da yok (service_role runbook) | OPS | 🔴 Erdi — açık |
+| B4 | `/satici-ol` başvuruları kayboluyor (`console.log`, DB/email yok) | KOD | 🔵 Claude — Sprint 11 |
+| B5 | Migration'lar prod'a push edilmemiş (`supabase db push`) | OPS | 🔴 Erdi — açık |
+| B6 | Mesafeli Satış sözleşmesinde tüzel kişi/adres eksik | HUKUK | ⏸️ Yalnız ödeme açılırsa zorunlu; pilot ödemesiz → ertelendi |
 
 **Pilot ödemesizdir** → B6 pilot için bloklayıcı değil, public launch öncesi zorunlu.
 
@@ -51,10 +55,10 @@
 
 ## Sprint Sırası (blocker-first, yalın)
 
-### Sprint 10 — Auth & Erişim Unblock *(launch-critical)*
-- **[KOD]** `/giris`'e email/şifre giriş yolu ekle (additive — mevcut SMS-OTP'yi bozmadan). Staff + pilot kullanıcıları SMS bağımlılığı olmadan girebilsin.
-- **[OPS/Erdi]** Karar: pilot için email/şifre mi, SMS provider mı? (Öneri: kapalı pilot için email/şifre — daha kontrollü, SMS maliyeti/config yok.)
-- **[OPS/Erdi]** İlk prod owner staff hesabı (service_role 3-adım runbook).
+### Sprint 10 — Auth & Erişim Unblock *(launch-critical)* — ✅ KOD TAMAM
+- ✅ **[KOD]** `/giris`'e email/şifre giriş yolu eklendi (additive, SMS'i bozmadan). `signInWithPassword`, sign-in only; `config.toml`'da email self-signup kapatıldı. (`fb9df50`)
+- ✅ **[KARAR]** Pilot auth = email/şifre (SMS yok).
+- 🔴 **[OPS/Erdi]** İlk prod owner staff hesabı (service_role 3-adım runbook) + pilot kullanıcı email/şifre hesaplarını admin oluşturur.
 - *Öğrenme hedefi:* erişim güvenli ve sürtünmesiz mi.
 
 ### Sprint 11 — Intake & Veri Bütünlüğü
@@ -83,8 +87,8 @@
 
 ## Erdi'nin Operasyon Checklist'i (kod dışı, paralel)
 
-- [ ] Pilot auth kararı: email/şifre mi, SMS provider mı (B1/B2).
-- [ ] Supabase prod: SMS provider (seçilirse) + ilk owner staff hesabı (B2/B3).
+- [x] Pilot auth kararı: **email/şifre** (SMS Faz 2'ye ertelendi).
+- [ ] Supabase prod: ilk owner staff hesabı + pilot kullanıcı email/şifre hesapları (admin/service_role ile) (B3).
 - [ ] `supabase db push` → migration'lar + RPC'ler prod'da (B5).
 - [ ] Vercel monorepo deploy ayarı (root `apps/web`, `prebuild` theme:sync çalışsın); `config.toml project_id` gerçek değere.
 - [ ] Sentry + PostHog hesap/key'leri.
